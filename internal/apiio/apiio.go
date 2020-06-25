@@ -29,3 +29,21 @@ type LoginRequest struct {
 	Email        string `validate:"required,email,lowercase"`
 	PasswordHash string `validate:"required,min=10"`
 }
+
+// NewServerRequest ..
+type NewServerRequest struct {
+	Name      string `validate:"required,min=10"`
+	IP        string `validate:"required,min=10"`
+	Port      string `validate:"required,min=10"`
+	User      string `validate:"required,min=10"`
+	LoginWith string `validate:"required,min=10"`
+	Key       string `validate:"required,min=10"`
+
+	OrganizationID uint64
+}
+
+// ListServerResponse ..
+type ListServerResponse struct {
+	Response
+	Data []model.Server
+}

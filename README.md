@@ -9,10 +9,11 @@
   - [x] login in, keep user status at client
   - [x] logout
 - [ ] basic function
-  - [ ] create host
-  - [ ] list host
-  - [ ] update host
-  - [ ] delete host
+  - [x] create server
+  - [x] list server
+  - [ ] connect to server
+  - [ ] update server
+  - [ ] delete server
 
 Thanks for those awesome work:
 

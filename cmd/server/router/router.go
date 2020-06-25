@@ -28,7 +28,7 @@ func Serve(conf string, port int) {
 	if dao.Conf.Debug {
 		dao.DB = dao.DB.Debug()
 	}
-	if err := dao.DB.AutoMigrate(&model.User{}, &model.Organization{}, &model.Host{}, &model.OrganizationMember{}, &model.HostOrganization{}).Error; err != nil {
+	if err := dao.DB.AutoMigrate(&model.User{}, &model.Organization{}, &model.Server{}, &model.OrganizationMember{}, &model.ServerOrganization{}).Error; err != nil {
 		panic(err)
 	}
 
@@ -77,6 +77,66 @@ func Serve(conf string, port int) {
 		c.JSON(apiio.Response{
 			Success: true,
 			Message: "logout successful!",
+		})
+	})
+
+	user.Post("/server", func(c *fiber.Ctx) {
+		user := c.Locals("user").(model.User)
+		var req apiio.NewServerRequest
+		if err := c.BodyParser(&req); err != nil {
+			c.Next(err)
+			return
+		}
+		if err := validator.Validator.Struct(req); err != nil {
+			c.Next(err)
+			return
+		}
+
+		var server model.Server
+		if req.OrganizationID > 0 {
+			var count uint64
+			dao.DB.Where(&model.OrganizationMember{}, "user_id = ? AND organization_id = ?", user.ID, req.OrganizationID).Count(&count)
+			if count == 0 {
+				c.Next(fmt.Errorf("You don't have permission to write organization(%d)", req.OrganizationID))
+				return
+			}
+			server.OwnerType = model.ServerOwnerTypeOrganization
+			server.OwnerID = req.OrganizationID
+		} else {
+			server.OwnerType = model.ServerOwnerTypeUser
+			server.OwnerID = user.ID
+		}
+
+		server.IP = req.IP
+		server.Key = req.Key
+		server.LoginWith = req.LoginWith
+		server.Name = req.Name
+		server.Port = req.Port
+		server.User = req.User
+
+		if err := dao.DB.Save(&server).Error; err != nil {
+			c.Next(err)
+			return
+		}
+
+		c.JSON(apiio.Response{
+			Success: true,
+			Message: fmt.Sprintf("Add server successful %s(%d)", req.Name, server.ID),
+		})
+	})
+
+	user.Get("/server", func(c *fiber.Ctx) {
+		user := c.Locals("user").(model.User)
+		var organizationID dao.FindIDResp
+		dao.DB.Model(&model.OrganizationMember{}).Select("organization_id as id").Where("user_id = ?", user.ID).Scan(&organizationID)
+		var servers []model.Server
+		dao.DB.Find(&servers, "(owner_type = ? AND owner_id = ?) OR (owner_type = ? AND owner_id in (?))", model.ServerOwnerTypeUser, user.ID, model.ServerOwnerTypeOrganization, organizationID.ID)
+		c.JSON(apiio.ListServerResponse{
+			Response: apiio.Response{
+				Success: true,
+				Message: "",
+			},
+			Data: servers,
 		})
 	})
 

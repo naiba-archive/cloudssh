@@ -14,3 +14,8 @@ func InitDB(dsn string) error {
 	DB, err = gorm.Open("mysql", dsn)
 	return err
 }
+
+// FindIDResp ..
+type FindIDResp struct {
+	ID []uint64
+}

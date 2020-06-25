@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -166,6 +167,42 @@ func (cs *CipherString) Decrypt(key CryptoKey) ([]byte, error) {
 
 	ct, err = padding.NewPkcs7Padding(16).Unpad(ct) //TODO, configurable size
 	return ct, err
+}
+
+// EncryptStruct ..
+func EncryptStruct(data interface{}, key CryptoKey) error {
+	v := reflect.ValueOf(data).Elem()
+	t := reflect.TypeOf(data).Elem()
+	for i := 0; i < t.NumField(); i++ {
+		if t.Field(i).Type.Kind() == reflect.String {
+			cs, err := Encrypt([]byte(v.Field(i).String()), key)
+			if err != nil {
+				return err
+			}
+			v.Field(i).SetString(cs.ToString())
+		}
+	}
+	return nil
+}
+
+// DecryptStruct ...
+func DecryptStruct(data interface{}, key CryptoKey) error {
+	v := reflect.ValueOf(data).Elem()
+	t := reflect.TypeOf(data).Elem()
+	for i := 0; i < t.NumField(); i++ {
+		if t.Field(i).Type.Kind() == reflect.String {
+			cs, err := NewCipherString(v.Field(i).String())
+			if err != nil {
+				return err
+			}
+			pt, err := cs.Decrypt(key)
+			if err != nil {
+				return err
+			}
+			v.Field(i).SetString(string(pt))
+		}
+	}
+	return nil
 }
 
 // Encrypt ..

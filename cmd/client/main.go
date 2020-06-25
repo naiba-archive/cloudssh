@@ -19,6 +19,7 @@ func init() {
 	rootCmd.AddCommand(cmd.SignUpCmd)
 	rootCmd.AddCommand(cmd.LogoutCmd)
 	rootCmd.AddCommand(cmd.LoginCmd)
+	rootCmd.AddCommand(cmd.ServerCmd)
 }
 
 func main() {
