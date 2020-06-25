@@ -15,35 +15,38 @@ import (
 // SignUpCmd ..
 var SignUpCmd *cobra.Command
 
-var (
-	email    *string
-	password *string
-	server   *string
-)
-
 func init() {
 	SignUpCmd = &cobra.Command{
 		Use:   "signup",
 		Short: "signup into cloudssh instance",
 	}
-	email = SignUpCmd.Flags().StringP("email", "u", "hi@example.com", "your email account")
-	password = SignUpCmd.Flags().StringP("password", "p", "********", "your password")
-	server = SignUpCmd.Flags().StringP("server", "s", "https://cssh.example.com", "a cloudssh server instance")
+	SignUpCmd.Flags().StringP("email", "u", "hi@example.com", "your email account")
+	SignUpCmd.Flags().StringP("password", "p", "********", "your password")
+	SignUpCmd.Flags().StringP("server", "s", "https://cssh.example.com", "a cloudssh server instance")
 	SignUpCmd.Run = signup
 }
 
 func signup(cmd *cobra.Command, args []string) {
+	var (
+		email    string
+		password string
+		server   string
+	)
+	email, _ = cmd.Flags().GetString("email")
+	password, _ = cmd.Flags().GetString("password")
+	server, _ = cmd.Flags().GetString("server")
+
 	if dao.Conf.User.Token != "" && dao.Conf.User.TokenExpires.After(time.Now()) {
 		log.Println("You already logged in", dao.Conf.Server, ", please logout first.")
 		return
 	}
 
-	dao.Conf.Server = *server
+	dao.Conf.Server = server
 
 	var req apiio.RegisterRequest
-	req.Email = *email
-	dao.Conf.MasterKey = xcrypto.MakeKey(*password, strings.ToLower(*email))
-	req.PasswordHash = xcrypto.MakePassworkHash(*password, dao.Conf.MasterKey)
+	req.Email = email
+	dao.Conf.MasterKey = xcrypto.MakeKey(password, strings.ToLower(email))
+	req.PasswordHash = xcrypto.MakePassworkHash(password, dao.Conf.MasterKey)
 	encKey, err := xcrypto.MakeEncKey(dao.Conf.MasterKey.EncKey)
 	if err != nil {
 		log.Println("MakeEncKey", err)
@@ -78,5 +81,5 @@ func signup(cmd *cobra.Command, args []string) {
 	}
 	dao.Conf.User = resp.Data
 	err = dao.Conf.Save()
-	log.Println("Signup Success", resp.Data.ID, resp.Data.Email, err)
+	log.Println("Signup Success", "ID", resp.Data.ID, resp.Data.Email, err)
 }

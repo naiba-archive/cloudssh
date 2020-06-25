@@ -15,12 +15,10 @@ var LogoutCmd *cobra.Command
 
 func init() {
 	LogoutCmd = &cobra.Command{
-		Use:   "login",
-		Short: "login into cloudssh instance",
+		Use:   "logout",
+		Short: "user logout",
 	}
-	email = LogoutCmd.Flags().StringP("email", "u", "hi@example.com", "your email account")
-	password = LogoutCmd.Flags().StringP("password", "p", "********", "your password")
-	server = LogoutCmd.Flags().StringP("server", "s", "https://cssh.example.com", "a cloudssh server instance")
+	LogoutCmd.Flags().BoolP("force", "f", false, "force logout")
 	LogoutCmd.Run = logout
 }
 
@@ -37,9 +35,14 @@ func logout(cmd *cobra.Command, args []string) {
 	}
 	if !resp.Success {
 		log.Println("API Request", resp.Message)
-		return
+		force, _ := cmd.Flags().GetBool("force")
+		if !force {
+			return
+		}
 	}
 	dao.Conf.User = model.User{}
 	err = dao.Conf.Save()
-	log.Println("Logout Success", err)
+	if resp.Success {
+		log.Println(resp.Message)
+	}
 }

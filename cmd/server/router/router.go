@@ -2,6 +2,7 @@ package router
 
 import (
 	"strings"
+	"time"
 
 	"github.com/gofiber/fiber"
 	"github.com/gofiber/logger"
@@ -36,7 +37,10 @@ func Serve(conf string, port int) {
 		authHeader := c.Get("Authorization")
 		arr := strings.Split(authHeader, " ")
 		if len(arr) == 2 {
-			c.Locals("", "")
+			var user model.User
+			if dao.DB.First(&user, "token = ? AND token_expires > ?", arr[1], time.Now()).Error == nil {
+				c.Locals("user", user)
+			}
 		}
 		c.Next()
 	})
@@ -80,6 +84,35 @@ func Serve(conf string, port int) {
 			Data: user,
 		})
 	})
+
+	memberAPI := app.Group("", func(c *fiber.Ctx) {
+		if c.Locals("user") == nil {
+			c.JSON(apiio.Response{
+				Success: false,
+				Message: "You must login to continue this action.",
+			})
+			return
+		}
+		c.Next()
+	})
+
+	memberAPI.Get("/logout", func(c *fiber.Ctx) {
+		user := c.Locals("user").(model.User)
+		user.RefreshToken()
+		user.TokenExpires = time.Unix(0, 0)
+		if err := dao.DB.Save(&user).Error; err != nil {
+			c.JSON(apiio.Response{
+				Success: false,
+				Message: err.Error(),
+			})
+			return
+		}
+		c.JSON(apiio.Response{
+			Success: true,
+			Message: "logout successful!",
+		})
+	})
+
 	app.Listen(port)
 }
 
