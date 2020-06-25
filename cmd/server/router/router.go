@@ -1,6 +1,7 @@
 package router
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -32,6 +33,13 @@ func Serve(conf string, port int) {
 	}
 
 	app := fiber.New()
+	app.Settings.ErrorHandler = func(c *fiber.Ctx, err error) {
+		c.JSON(apiio.Response{
+			Success: false,
+			Message: err.Error(),
+		})
+	}
+
 	app.Use(timer())
 	app.Use(logger.New())
 
@@ -49,10 +57,7 @@ func Serve(conf string, port int) {
 
 	user := app.Group("/user", func(c *fiber.Ctx) {
 		if c.Locals("user") == nil {
-			c.JSON(apiio.Response{
-				Success: false,
-				Message: "You must login to continue this action.",
-			})
+			c.Next(errors.New("You must login to continue"))
 			return
 		}
 		c.Next()
@@ -60,13 +65,13 @@ func Serve(conf string, port int) {
 
 	user.Get("/logout", func(c *fiber.Ctx) {
 		user := c.Locals("user").(model.User)
-		user.RefreshToken()
+		if err := user.RefreshToken(); err != nil {
+			c.Next(err)
+			return
+		}
 		user.TokenExpires = time.Unix(0, 0)
 		if err := dao.DB.Save(&user).Error; err != nil {
-			c.JSON(apiio.Response{
-				Success: false,
-				Message: err.Error(),
-			})
+			c.Next(err)
 			return
 		}
 		c.JSON(apiio.Response{
@@ -77,34 +82,37 @@ func Serve(conf string, port int) {
 
 	app.Post("/signup", func(c *fiber.Ctx) {
 		var req apiio.RegisterRequest
-		err := c.BodyParser(&req)
-		if err == nil {
-			err = validator.Validator.Struct(req)
+		if err := c.BodyParser(&req); err != nil {
+			c.Next(err)
+			return
 		}
-		if err == nil {
-			_, err = xcrypto.BytesToPublicKey([]byte(req.Pubkey))
+		if err := validator.Validator.Struct(req); err != nil {
+			c.Next(err)
+			return
+		}
+
+		if _, err := xcrypto.BytesToPublicKey([]byte(req.Pubkey)); err != nil {
+			c.Next(err)
+			return
 		}
 		var user model.User
-		if err == nil {
-			user.Email = req.Email
-			var ph []byte
-			ph, err = bcrypt.GenerateFromPassword([]byte(req.PasswordHash), 14)
-			user.PasswordHash = string(ph)
-			user.EncryptKey = req.EncryptKey
-			user.Privatekey = req.Privatekey
-			user.Pubkey = req.Pubkey
-		}
-		if err == nil {
-			err = user.RefreshToken()
-		}
-		if err == nil {
-			err = dao.DB.Save(&user).Error
-		}
+		user.Email = req.Email
+		var ph []byte
+		ph, err := bcrypt.GenerateFromPassword([]byte(req.PasswordHash), 14)
+		user.PasswordHash = string(ph)
+		user.EncryptKey = req.EncryptKey
+		user.Privatekey = req.Privatekey
+		user.Pubkey = req.Pubkey
 		if err != nil {
-			c.JSON(apiio.Response{
-				Success: false,
-				Message: err.Error(),
-			})
+			c.Next(err)
+			return
+		}
+		if err := user.RefreshToken(); err != nil {
+			c.Next(err)
+			return
+		}
+		if err := dao.DB.Save(&user).Error; err != nil {
+			c.Next(err)
 			return
 		}
 		c.JSON(apiio.RegisterResponse{
@@ -117,28 +125,29 @@ func Serve(conf string, port int) {
 
 	app.Post("/login", func(c *fiber.Ctx) {
 		var req apiio.LoginRequest
-		err := c.BodyParser(&req)
-		if err == nil {
-			err = validator.Validator.Struct(req)
+		if err := c.BodyParser(&req); err != nil {
+			c.Next(err)
+			return
+		}
+		if err := validator.Validator.Struct(req); err != nil {
+			c.Next(err)
+			return
 		}
 		var user model.User
-		if err == nil {
-			err = dao.DB.First(&user, "email = ?", req.Email).Error
+		if err := dao.DB.First(&user, "email = ?", req.Email).Error; err != nil {
+			c.Next(err)
+			return
 		}
-		if err == nil {
-			err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.PasswordHash))
+		if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.PasswordHash)); err != nil {
+			c.Next(err)
+			return
 		}
-		if err == nil {
-			err = user.RefreshToken()
+		if err := user.RefreshToken(); err != nil {
+			c.Next(err)
+			return
 		}
-		if err == nil {
-			err = dao.DB.Save(&user).Error
-		}
-		if err != nil {
-			c.JSON(apiio.Response{
-				Success: false,
-				Message: err.Error(),
-			})
+		if err := dao.DB.Save(&user).Error; err != nil {
+			c.Next(err)
 			return
 		}
 		c.JSON(apiio.RegisterResponse{
