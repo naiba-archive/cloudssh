@@ -1,6 +1,7 @@
 package router
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -31,6 +32,7 @@ func Serve(conf string, port int) {
 	}
 
 	app := fiber.New()
+	app.Use(timer())
 	app.Use(logger.New())
 
 	app.Use(func(c *fiber.Ctx) {
@@ -43,6 +45,34 @@ func Serve(conf string, port int) {
 			}
 		}
 		c.Next()
+	})
+
+	user := app.Group("/user", func(c *fiber.Ctx) {
+		if c.Locals("user") == nil {
+			c.JSON(apiio.Response{
+				Success: false,
+				Message: "You must login to continue this action.",
+			})
+			return
+		}
+		c.Next()
+	})
+
+	user.Get("/logout", func(c *fiber.Ctx) {
+		user := c.Locals("user").(model.User)
+		user.RefreshToken()
+		user.TokenExpires = time.Unix(0, 0)
+		if err := dao.DB.Save(&user).Error; err != nil {
+			c.JSON(apiio.Response{
+				Success: false,
+				Message: err.Error(),
+			})
+			return
+		}
+		c.JSON(apiio.Response{
+			Success: true,
+			Message: "logout successful!",
+		})
 	})
 
 	app.Post("/signup", func(c *fiber.Ctx) {
@@ -85,39 +115,52 @@ func Serve(conf string, port int) {
 		})
 	})
 
-	memberAPI := app.Group("", func(c *fiber.Ctx) {
-		if c.Locals("user") == nil {
-			c.JSON(apiio.Response{
-				Success: false,
-				Message: "You must login to continue this action.",
-			})
-			return
+	app.Post("/login", func(c *fiber.Ctx) {
+		var req apiio.LoginRequest
+		err := c.BodyParser(&req)
+		if err == nil {
+			err = validator.Validator.Struct(req)
 		}
-		c.Next()
-	})
-
-	memberAPI.Get("/logout", func(c *fiber.Ctx) {
-		user := c.Locals("user").(model.User)
-		user.RefreshToken()
-		user.TokenExpires = time.Unix(0, 0)
-		if err := dao.DB.Save(&user).Error; err != nil {
+		var user model.User
+		if err == nil {
+			err = dao.DB.First(&user, "email = ?", req.Email).Error
+		}
+		if err == nil {
+			err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.PasswordHash))
+		}
+		if err == nil {
+			err = user.RefreshToken()
+		}
+		if err == nil {
+			err = dao.DB.Save(&user).Error
+		}
+		if err != nil {
 			c.JSON(apiio.Response{
 				Success: false,
 				Message: err.Error(),
 			})
 			return
 		}
-		c.JSON(apiio.Response{
-			Success: true,
-			Message: "logout successful!",
+		c.JSON(apiio.RegisterResponse{
+			Response: apiio.Response{
+				Success: true,
+			},
+			Data: user,
 		})
 	})
 
 	app.Listen(port)
 }
 
-// CheckPasswordHash ..
-func CheckPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
+func timer() func(*fiber.Ctx) {
+	return func(c *fiber.Ctx) {
+		// start timer
+		start := time.Now()
+		// next routes
+		c.Next()
+		// stop timer
+		stop := time.Now()
+		// Do something with response
+		c.Append("Server-Timing", fmt.Sprintf("app;dur=%v", stop.Sub(start).String()))
+	}
 }

@@ -18,6 +18,7 @@ func init() {
 	cobra.OnInitialize(dao.InitConfig)
 	rootCmd.AddCommand(cmd.SignUpCmd)
 	rootCmd.AddCommand(cmd.LogoutCmd)
+	rootCmd.AddCommand(cmd.LoginCmd)
 }
 
 func main() {

@@ -4,10 +4,10 @@
 
 ## TODO
 
-- [ ] account
+- [x] account
   - [x] sign up
-  - [ ] login in, keep user status at client
-  - [ ] logout
+  - [x] login in, keep user status at client
+  - [x] logout
 - [ ] basic function
   - [ ] create host
   - [ ] list host
