@@ -47,7 +47,7 @@ func login(cmd *cobra.Command, args []string) {
 	req.Email = email
 	dao.Conf.MasterKey = xcrypto.MakeKey(password, strings.ToLower(email))
 	req.PasswordHash = xcrypto.MakePassworkHash(password, dao.Conf.MasterKey)
-	body, err := dao.API.Do("/login", "POST", req)
+	body, err := dao.API.Do("/auth/login", "POST", req)
 	if err != nil {
 		log.Println("API Request", err)
 		return

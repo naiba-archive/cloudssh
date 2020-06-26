@@ -27,7 +27,7 @@ func init() {
 
 // GetServers ..
 func (au *APIClient) GetServers() ([]model.Server, error) {
-	body, err := au.Do("/user/server", "GET", nil)
+	body, err := au.Do("/server", "GET", nil)
 	if err != nil {
 		return nil, err
 	}

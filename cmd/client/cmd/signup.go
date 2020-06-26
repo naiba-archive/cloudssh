@@ -65,7 +65,7 @@ func signup(cmd *cobra.Command, args []string) {
 		return
 	}
 	req.Pubkey = string(pubkeyByte)
-	body, err := dao.API.Do("/signup", "POST", req)
+	body, err := dao.API.Do("/auth/signup", "POST", req)
 	if err != nil {
 		log.Println("API Request", err)
 		return

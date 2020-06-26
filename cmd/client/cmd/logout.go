@@ -23,7 +23,7 @@ func init() {
 }
 
 func logout(cmd *cobra.Command, args []string) {
-	body, err := dao.API.Do("/user/logout", "GET", nil)
+	body, err := dao.API.Do("/auth/logout", "GET", nil)
 	if err != nil {
 		log.Println("API Request", err)
 		return

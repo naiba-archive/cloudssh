@@ -36,7 +36,7 @@ func delete(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	body, err := dao.API.Do("/user/server/batch-delete", "POST", req)
+	body, err := dao.API.Do("/server/batch-delete", "POST", req)
 	if err != nil {
 		log.Println("API Request", err)
 		return

@@ -75,7 +75,7 @@ func create(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	body, err := dao.API.Do("/user/server", "POST", req)
+	body, err := dao.API.Do("/server", "POST", req)
 	if err != nil {
 		log.Println("API Request", err)
 		return
