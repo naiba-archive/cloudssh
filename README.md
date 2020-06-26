@@ -2,18 +2,41 @@
 
 :cloud: SSH key cloud management tool inspired by Bitwarden.
 
+## Usage
+
+### Server
+
+```shell
+go run cmd/server/main.go
+```
+
+### Client
+
+```shell
+go run cmd/client/main.go -h
+go run cmd/client/main.go signup -s http://localhost -u hi@example.com -p password
+go run cmd/client/main.go server -h
+go run cmd/client/main.go server list
+```
+
 ## TODO
 
 - [x] account
   - [x] sign up
   - [x] login in, keep user status at client
   - [x] logout
-- [ ] basic function
+  - [ ] change password
+- [ ] server
   - [x] create server
   - [x] list server
-  - [ ] connect to server
+  - [x] connect to server
+  - [x] delete server
   - [ ] update server
-  - [ ] delete server
+- [ ] organization
+  - [ ] create organization
+  - [ ] add user
+  - [ ] add server
+  - [ ] delete user
 
 Thanks for those awesome work:
 
