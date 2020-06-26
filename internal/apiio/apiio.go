@@ -47,3 +47,8 @@ type ListServerResponse struct {
 	Response
 	Data []model.Server
 }
+
+// DeleteServerRequest ..
+type DeleteServerRequest struct {
+	ID []uint
+}

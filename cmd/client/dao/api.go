@@ -3,10 +3,15 @@ package dao
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	"github.com/naiba/cloudssh/internal/apiio"
+	"github.com/naiba/cloudssh/internal/model"
+	"github.com/naiba/cloudssh/pkg/xcrypto"
 )
 
 // APIClient ..
@@ -18,6 +23,28 @@ var API *APIClient
 
 func init() {
 	API = &APIClient{}
+}
+
+// GetServers ..
+func (au *APIClient) GetServers() ([]model.Server, error) {
+	body, err := au.Do("/user/server", "GET", nil)
+	if err != nil {
+		return nil, err
+	}
+	var resp apiio.ListServerResponse
+	if err = json.Unmarshal(body, &resp); err != nil {
+		return nil, err
+	}
+	if !resp.Success {
+		return nil, errors.New(resp.Message)
+	}
+	for i := 0; i < len(resp.Data); i++ {
+		err := xcrypto.DecryptStruct(&resp.Data[i], Conf.MasterKey)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return resp.Data, nil
 }
 
 // Do ..

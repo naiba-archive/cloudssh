@@ -15,4 +15,6 @@ func init() {
 	}
 	ServerCmd.AddCommand(server.ListCmd)
 	ServerCmd.AddCommand(server.CreateCmd)
+	ServerCmd.AddCommand(server.DialCmd)
+	ServerCmd.AddCommand(server.DeleteCmd)
 }

@@ -21,7 +21,7 @@ type Server struct {
 	Port      string
 	User      string
 	LoginWith string
-	Key       string // password or authorized key
+	Key       string `gorm:"type:text"` // password or authorized key
 
 	OwnerType uint
 	OwnerID   uint64

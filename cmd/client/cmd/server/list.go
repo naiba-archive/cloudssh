@@ -1,7 +1,6 @@
 package server
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -10,8 +9,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/naiba/cloudssh/cmd/client/dao"
-	"github.com/naiba/cloudssh/internal/apiio"
-	"github.com/naiba/cloudssh/pkg/xcrypto"
 )
 
 // ListCmd ..
@@ -19,40 +16,28 @@ var ListCmd *cobra.Command
 
 func init() {
 	ListCmd = &cobra.Command{
-		Use:   "ls",
+		Use:   "list",
 		Short: "List servers",
 	}
 	ListCmd.Run = list
 }
 
 func list(cmd *cobra.Command, args []string) {
-	body, err := dao.API.Do("/user/server", "GET", nil)
+	servers, err := dao.API.GetServers()
 	if err != nil {
-		log.Println("API Request", err)
+		log.Println("API.GetServers", err)
 		return
 	}
-	var resp apiio.ListServerResponse
-	if err = json.Unmarshal(body, &resp); err != nil {
-		log.Println("API Request", string(body), err)
-		return
-	}
-	if !resp.Success {
-		log.Println("API Request", resp.Message)
-		return
-	}
-
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"ID", "Name", "IP", "User", "CreatedAt"})
-	for i := 0; i < len(resp.Data); i++ {
-		xcrypto.DecryptStruct(&resp.Data[i], dao.Conf.MasterKey)
+	for i := 0; i < len(servers); i++ {
 		table.Append([]string{
-			fmt.Sprintf("%d", resp.Data[i].ID),
-			resp.Data[i].Name,
-			resp.Data[i].IP,
-			resp.Data[i].User,
-			resp.Data[i].CreatedAt.String(),
+			fmt.Sprintf("%d", servers[i].ID),
+			servers[i].Name,
+			servers[i].IP,
+			servers[i].User,
+			servers[i].CreatedAt.String(),
 		})
 	}
-
 	table.Render()
 }

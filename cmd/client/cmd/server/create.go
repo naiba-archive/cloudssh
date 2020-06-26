@@ -1,9 +1,12 @@
 package server
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"os"
 
 	"github.com/naiba/cloudssh/cmd/client/dao"
 	"github.com/naiba/cloudssh/internal/apiio"
@@ -38,8 +41,32 @@ func create(cmd *cobra.Command, args []string) {
 		log.Println("No such login method:", req.LoginWith)
 		return
 	}
-	fmt.Print("Please type authorizedKey/password: ")
-	fmt.Scanf("%s", &req.Key)
+	fmt.Print("Please type authorizedKey file path or password: ")
+	in := bufio.NewReader(os.Stdin)
+	line, err := in.ReadString('\n')
+	if err != nil {
+		log.Println("Read authorizedKey file path or password", err)
+		return
+	}
+	req.Key = line[:len(line)-1]
+	if req.LoginWith == model.ServerLoginWithAuthorizedKey {
+		info, err := os.Stat(req.Key)
+		if err != nil {
+			log.Println("Stat authorizedKey file", err)
+			return
+		}
+		m := info.Mode()
+		if m&(1<<2) == 0 {
+			log.Println("Can't read file, please check file permission", req.Key)
+			return
+		}
+		kb, err := ioutil.ReadFile(req.Key)
+		if err != nil {
+			log.Println("Read PrivateKey", err)
+			return
+		}
+		req.Key = string(kb)
+	}
 	fmt.Print("Please type a server note: ")
 	fmt.Scanf("%s", &req.Name)
 

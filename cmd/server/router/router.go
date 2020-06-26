@@ -125,6 +125,49 @@ func Serve(conf string, port int) {
 		})
 	})
 
+	user.Post("/server/batch-delete", func(c *fiber.Ctx) {
+		user := c.Locals("user").(model.User)
+		var req apiio.DeleteServerRequest
+		if err := c.BodyParser(&req); err != nil {
+			c.Next(err)
+			return
+		}
+		if err := validator.Validator.Struct(req); err != nil {
+			c.Next(err)
+			return
+		}
+
+		var originCount int
+		for i := 0; i < len(req.ID); i++ {
+			if req.ID[i] != 0 {
+				originCount++
+			}
+		}
+		if originCount == 0 {
+			c.Next(errors.New("empty server list"))
+			return
+		}
+
+		var organizationID dao.FindIDResp
+		dao.DB.Model(&model.OrganizationMember{}).Select("organization_id as id").Where("user_id = ?", user.ID).Scan(&organizationID)
+		var dbCount int
+		dao.DB.Model(&model.Server{}).Where("((owner_type = ? AND owner_id = ?) OR (owner_type = ? AND owner_id in (?))) AND id in (?)", model.ServerOwnerTypeUser, user.ID, model.ServerOwnerTypeOrganization, organizationID.ID, req.ID).Count(&dbCount)
+		if dbCount != originCount {
+			c.Next(errors.New("Some server not belongs you"))
+			return
+		}
+
+		if err := dao.DB.Delete(&model.Server{}, "id in (?)", req.ID).Error; err != nil {
+			c.Next(err)
+			return
+		}
+
+		c.JSON(apiio.Response{
+			Success: true,
+			Message: fmt.Sprintf("Delete servers (%v) successful!", req.ID),
+		})
+	})
+
 	user.Get("/server", func(c *fiber.Ctx) {
 		user := c.Locals("user").(model.User)
 		var organizationID dao.FindIDResp
