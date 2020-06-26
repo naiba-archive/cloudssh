@@ -19,7 +19,7 @@ type Server struct {
 	Name      string
 	IP        string
 	Port      string
-	User      string
+	LoginUser string
 	LoginWith string
 	Key       string `gorm:"type:text"` // password or authorized key
 

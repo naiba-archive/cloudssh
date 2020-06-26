@@ -27,14 +27,14 @@ func init() {
 }
 
 func create(cmd *cobra.Command, args []string) {
-	var req apiio.NewServerRequest
+	var req apiio.ServerRequest
 
 	fmt.Print("Please type your server IP: ")
 	fmt.Scanf("%s", &req.IP)
 	fmt.Print("Please type SSH port: ")
 	fmt.Scanf("%s", &req.Port)
 	fmt.Print("Please type login user: ")
-	fmt.Scanf("%s", &req.User)
+	fmt.Scanf("%s", &req.LoginUser)
 	fmt.Print("Please type login method(1:authorizedKey,2:password): ")
 	fmt.Scanf("%s", &req.LoginWith)
 	if req.LoginWith != model.ServerLoginWithAuthorizedKey && req.LoginWith != model.ServerLoginWithPassword {

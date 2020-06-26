@@ -30,12 +30,12 @@ type LoginRequest struct {
 	PasswordHash string `validate:"required,min=10"`
 }
 
-// NewServerRequest ..
-type NewServerRequest struct {
+// ServerRequest ..
+type ServerRequest struct {
 	Name      string `validate:"required,min=10"`
 	IP        string `validate:"required,min=10"`
 	Port      string `validate:"required,min=10"`
-	User      string `validate:"required,min=10"`
+	LoginUser string `validate:"required,min=10"`
 	LoginWith string `validate:"required,min=10"`
 	Key       string `validate:"required,min=10"`
 
@@ -51,4 +51,10 @@ type ListServerResponse struct {
 // DeleteServerRequest ..
 type DeleteServerRequest struct {
 	ID []uint
+}
+
+// GetServerResponse ..
+type GetServerResponse struct {
+	Response
+	Data model.Server
 }

@@ -52,7 +52,7 @@ func dial(cmd *cobra.Command, args []string) {
 	}
 	var conf ssh.ClientConfig
 	conf.Timeout = time.Second * 8
-	conf.User = server.User
+	conf.User = server.LoginUser
 	conf.HostKeyCallback = ssh.InsecureIgnoreHostKey()
 	switch server.LoginWith {
 	case model.ServerLoginWithAuthorizedKey:

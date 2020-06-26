@@ -6,7 +6,6 @@ import (
 
 	"github.com/naiba/cloudssh/cmd/client/dao"
 	"github.com/naiba/cloudssh/internal/apiio"
-	"github.com/naiba/cloudssh/internal/model"
 	"github.com/spf13/cobra"
 )
 
@@ -34,13 +33,13 @@ func logout(cmd *cobra.Command, args []string) {
 		return
 	}
 	if !resp.Success {
-		log.Println("API Request", resp.Message)
 		force, _ := cmd.Flags().GetBool("force")
 		if !force {
+			log.Println("API Request", resp.Message)
 			return
 		}
 	}
-	dao.Conf.User = model.User{}
+	dao.Conf = &dao.Config{}
 	err = dao.Conf.Save()
 	if resp.Success {
 		log.Println(resp.Message)

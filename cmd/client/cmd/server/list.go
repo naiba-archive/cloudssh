@@ -35,7 +35,7 @@ func list(cmd *cobra.Command, args []string) {
 			fmt.Sprintf("%d", servers[i].ID),
 			servers[i].Name,
 			servers[i].IP,
-			servers[i].User,
+			servers[i].LoginUser,
 			servers[i].CreatedAt.String(),
 		})
 	}

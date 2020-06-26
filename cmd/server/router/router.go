@@ -37,7 +37,7 @@ func Serve(conf string, port int) {
 		})
 	}
 
-	app.Use(timer())
+	app.Use(timer)
 	app.Use(logger.New())
 	app.Use(middleware.Auth)
 
@@ -49,20 +49,20 @@ func Serve(conf string, port int) {
 	server := app.Group("/server", middleware.Protected)
 	server.Post("/", handler.CreateServer)
 	server.Post("/batch-delete", handler.BatchDelete)
+	server.Patch("/:id", handler.EditServer)
+	server.Get("/:id", handler.GetServer)
 	server.Get("/", handler.ListServer)
 
 	app.Listen(port)
 }
 
-func timer() func(*fiber.Ctx) {
-	return func(c *fiber.Ctx) {
-		// start timer
-		start := time.Now()
-		// next routes
-		c.Next()
-		// stop timer
-		stop := time.Now()
-		// Do something with response
-		c.Append("Server-Timing", fmt.Sprintf("app;dur=%v", stop.Sub(start).String()))
-	}
+func timer(c *fiber.Ctx) {
+	// start timer
+	start := time.Now()
+	// next routes
+	c.Next()
+	// stop timer
+	stop := time.Now()
+	// Do something with response
+	c.Append("Server-Timing", fmt.Sprintf("app;dur=%v", stop.Sub(start).String()))
 }
