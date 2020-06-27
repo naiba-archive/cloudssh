@@ -11,11 +11,11 @@ RUN echo http://dl-2.alpinelinux.org/alpine/edge/community/ >> /etc/apk/reposito
   && apk --no-cache --no-progress add \
     tzdata
 # Copy binary to container
-WORKDIR /data
+WORKDIR /cloudssh
 ADD resource resource
 COPY --from=binarybuilder /go/src/github.com/naiba/cloudssh/cmd/server/server ./cloudssh
 
 # Configure Docker Container
-VOLUME ["/data/conf"]
+VOLUME ["/cloudssh/data"]
 EXPOSE 8000
-CMD ["/data/cloudssh","-conf","/data/config.json"]
+CMD ["/cloudssh/cloudssh","-conf","/cloudssh/data/config.json"]
