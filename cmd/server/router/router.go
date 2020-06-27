@@ -41,6 +41,10 @@ func Serve(conf string, port int) {
 	app.Use(logger.New())
 	app.Use(middleware.Auth)
 
+	app.Get("/", func(c *fiber.Ctx) {
+		c.Render("resource/template/index.html", nil)
+	})
+
 	auth := app.Group("/auth")
 	auth.Get("/logout", middleware.Protected, handler.Logout)
 	auth.Post("/signup", handler.SignUp)

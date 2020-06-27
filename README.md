@@ -41,7 +41,7 @@ go run cmd/client/main.go server list
   - [x] add server
   - [x] edit server
   - [x] delete server
-- [ ] default guide page
+- [x] default guide page
 
 Thanks for those awesome work:
 

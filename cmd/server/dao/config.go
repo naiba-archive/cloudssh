@@ -7,9 +7,8 @@ import (
 
 // Config ..
 type Config struct {
-	Debug  bool
-	DBDSN  string
-	Domain string
+	Debug bool
+	DBDSN string
 }
 
 // Conf ..
