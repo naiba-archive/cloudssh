@@ -22,6 +22,14 @@ func init() {
 }
 
 func logout(cmd *cobra.Command, args []string) {
+	var flag bool
+	defer func() {
+		force, _ := cmd.Flags().GetBool("force")
+		if force || flag {
+			dao.Conf = &dao.Config{}
+			dao.Conf.Save()
+		}
+	}()
 	body, err := dao.API.Do("/auth/logout", "GET", nil)
 	if err != nil {
 		log.Println("API Request", err)
@@ -33,15 +41,11 @@ func logout(cmd *cobra.Command, args []string) {
 		return
 	}
 	if !resp.Success {
-		force, _ := cmd.Flags().GetBool("force")
-		if !force {
-			log.Println("API Request", resp.Message)
-			return
-		}
+		log.Println("API Request", resp.Message)
+		return
 	}
-	dao.Conf = &dao.Config{}
-	err = dao.Conf.Save()
 	if resp.Success {
 		log.Println(resp.Message)
 	}
+	flag = true
 }
