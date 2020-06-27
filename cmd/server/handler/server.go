@@ -15,10 +15,14 @@ import (
 func GetServer(c *fiber.Ctx) {
 	user := c.Locals("user").(model.User)
 
-	var organizationID dao.FindIDResp
-	dao.DB.Model(&model.OrganizationMember{}).Select("organization_id as id").Where("user_id = ?", user.ID).Scan(&organizationID)
+	var organizationID []dao.FindIDResp
+	dao.DB.Model(&model.OrganizationUser{}).Select("organization_id as id").Where("user_id = ?", user.ID).Scan(&organizationID)
+	var ids []int64
+	for i := 0; i < len(organizationID); i++ {
+		ids = append(ids, organizationID[i].ID)
+	}
 	var server model.Server
-	if err := dao.DB.First(&server, "((owner_type = ? AND owner_id = ?) OR (owner_type = ? AND owner_id in (?))) AND id = ?", model.ServerOwnerTypeUser, user.ID, model.ServerOwnerTypeOrganization, organizationID.ID, c.Params("id")).Error; err != nil {
+	if err := dao.DB.First(&server, "((owner_type = ? AND owner_id = ?) OR (owner_type = ? AND owner_id in (?))) AND id = ?", model.ServerOwnerTypeUser, user.ID, model.ServerOwnerTypeOrganization, ids, c.Params("id")).Error; err != nil {
 		c.Next(err)
 		return
 	}
@@ -45,10 +49,15 @@ func EditServer(c *fiber.Ctx) {
 		return
 	}
 
-	var organizationID dao.FindIDResp
-	dao.DB.Model(&model.OrganizationMember{}).Select("organization_id as id").Where("user_id = ?", user.ID).Scan(&organizationID)
+	var orgUser model.OrganizationUser
+	if req.OrganizationID > 0 {
+		if err := dao.DB.First(&orgUser, "organization_id = ? AND user_id = ? AND permission >= ?", req.OrganizationID, user.ID, model.OUPermissionReadWrite).Error; err != nil {
+			c.Next(err)
+			return
+		}
+	}
 	var server model.Server
-	if err := dao.DB.First(&server, "((owner_type = ? AND owner_id = ?) OR (owner_type = ? AND owner_id in (?))) AND id = ?", model.ServerOwnerTypeUser, user.ID, model.ServerOwnerTypeOrganization, organizationID.ID, c.Params("id")).Error; err != nil {
+	if err := dao.DB.First(&server, "((owner_type = ? AND owner_id = ?) OR (owner_type = ? AND owner_id = ?)) AND id = ?", model.ServerOwnerTypeUser, user.ID, model.ServerOwnerTypeOrganization, orgUser.OrganizationID, c.Params("id")).Error; err != nil {
 		c.Next(err)
 		return
 	}
@@ -74,10 +83,8 @@ func EditServer(c *fiber.Ctx) {
 // ListServer ..
 func ListServer(c *fiber.Ctx) {
 	user := c.Locals("user").(model.User)
-	var organizationID dao.FindIDResp
-	dao.DB.Model(&model.OrganizationMember{}).Select("organization_id as id").Where("user_id = ?", user.ID).Scan(&organizationID)
 	var servers []model.Server
-	dao.DB.Find(&servers, "(owner_type = ? AND owner_id = ?) OR (owner_type = ? AND owner_id in (?))", model.ServerOwnerTypeUser, user.ID, model.ServerOwnerTypeOrganization, organizationID.ID)
+	dao.DB.Find(&servers, "owner_type = ? AND owner_id = ?", model.ServerOwnerTypeUser, user.ID)
 	c.JSON(apiio.ListServerResponse{
 		Response: apiio.Response{
 			Success: true,
@@ -111,10 +118,17 @@ func BatchDelete(c *fiber.Ctx) {
 		return
 	}
 
-	var organizationID dao.FindIDResp
-	dao.DB.Model(&model.OrganizationMember{}).Select("organization_id as id").Where("user_id = ?", user.ID).Scan(&organizationID)
 	var dbCount int
-	dao.DB.Model(&model.Server{}).Where("((owner_type = ? AND owner_id = ?) OR (owner_type = ? AND owner_id in (?))) AND id in (?)", model.ServerOwnerTypeUser, user.ID, model.ServerOwnerTypeOrganization, organizationID.ID, req.ID).Count(&dbCount)
+	if req.OrganizationID > 0 {
+		var orgUser model.OrganizationUser
+		if err := dao.DB.First(&orgUser, "permission >= ? AND organization_id = ? AND user_id = ?", model.OUPermissionReadWrite, req.OrganizationID, user.ID).Error; err != nil {
+			c.Next(err)
+			return
+		}
+		dao.DB.Model(&model.Server{}).Where("owner_type = ? AND owner_id = ? AND id in (?)", model.ServerOwnerTypeOrganization, req.OrganizationID, req.ID).Count(&dbCount)
+	} else {
+		dao.DB.Model(&model.Server{}).Where("owner_type = ? AND owner_id = ? AND id in (?)", model.ServerOwnerTypeUser, user.ID, req.ID).Count(&dbCount)
+	}
 	if dbCount != originCount {
 		c.Next(errors.New("Some server not belongs you"))
 		return
@@ -147,7 +161,7 @@ func CreateServer(c *fiber.Ctx) {
 	var server model.Server
 	if req.OrganizationID > 0 {
 		var count uint64
-		dao.DB.Where(&model.OrganizationMember{}, "user_id = ? AND organization_id = ?", user.ID, req.OrganizationID).Count(&count)
+		dao.DB.Model(&model.OrganizationUser{}).Where("user_id = ? AND organization_id = ? AND permission >= ?", user.ID, req.OrganizationID, model.OUPermissionReadWrite).Count(&count)
 		if count == 0 {
 			c.Next(fmt.Errorf("You don't have permission to write organization(%d)", req.OrganizationID))
 			return

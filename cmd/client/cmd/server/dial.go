@@ -35,7 +35,7 @@ func dial(cmd *cobra.Command, args []string) {
 		log.Println("You must set which server you want to connect")
 		return
 	}
-	servers, err := dao.API.GetServers()
+	servers, err := dao.API.GetServers(0)
 	if err != nil {
 		log.Println("API.GetServers", err)
 		return

@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/liamylian/x-rsa/golang/xrsa"
 	home "github.com/mitchellh/go-homedir"
 	"github.com/naiba/cloudssh/internal/model"
 	"github.com/naiba/cloudssh/pkg/xcrypto"
@@ -55,4 +56,17 @@ func fileExists(filename string) bool {
 		return false
 	}
 	return !info.IsDir()
+}
+
+// GerUserXRsa ..
+func (c *Config) GerUserXRsa() (*xrsa.XRsa, error) {
+	cs, err := xcrypto.NewCipherString(c.User.Privatekey)
+	if err != nil {
+		return nil, err
+	}
+	userPrivateKeyByte, err := cs.Decrypt(c.MasterKey)
+	if err != nil {
+		return nil, err
+	}
+	return xrsa.NewXRsa([]byte(c.User.Pubkey), userPrivateKeyByte)
 }

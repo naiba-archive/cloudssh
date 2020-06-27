@@ -33,10 +33,15 @@ go run cmd/client/main.go server list
   - [x] delete server
   - [x] update server
 - [ ] organization
-  - [ ] create organization
+  - [x] create organization
+  - [ ] edit organization
+  - [ ] delete organization
   - [ ] add user
-  - [ ] add server
+  - [ ] edit user permission
   - [ ] delete user
+  - [x] add server
+  - [x] edit server
+  - [x] delete server
 
 Thanks for those awesome work:
 

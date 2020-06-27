@@ -8,6 +8,14 @@ type Response struct {
 	Message string
 }
 
+// UserInfoResponse ..
+type UserInfoResponse struct {
+	Response
+	Data struct {
+		Pubkey string
+	}
+}
+
 // RegisterRequest ..
 type RegisterRequest struct {
 	Email        string `validate:"required,email,lowercase"`
@@ -50,11 +58,44 @@ type ListServerResponse struct {
 
 // DeleteServerRequest ..
 type DeleteServerRequest struct {
-	ID []uint
+	ID             []uint
+	OrganizationID uint64
 }
 
 // GetServerResponse ..
 type GetServerResponse struct {
 	Response
 	Data model.Server
+}
+
+// OrgRequrest ..
+type OrgRequrest struct {
+	Name   string
+	Pubkey string
+	Prikey string
+}
+
+// MyOrganizationInfo ..
+type MyOrganizationInfo struct {
+	Organization     model.Organization
+	OrganizationUser model.OrganizationUser
+}
+
+// GetOrganizationResponse ..
+type GetOrganizationResponse struct {
+	Response
+	Data MyOrganizationInfo
+}
+
+// GetUserOrganizationInfoResponse ..
+type GetUserOrganizationInfoResponse struct {
+	Response
+	Data model.OrganizationUser
+}
+
+// AddOrganizationUserRequest ..
+type AddOrganizationUserRequest struct {
+	OrganizationID uint64
+	Permission     uint
+	Email          string
 }

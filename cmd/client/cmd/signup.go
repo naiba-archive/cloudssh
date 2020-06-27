@@ -1,15 +1,18 @@
 package cmd
 
 import (
+	"bytes"
 	"encoding/json"
 	"log"
 	"strings"
 	"time"
 
+	"github.com/liamylian/x-rsa/golang/xrsa"
+	"github.com/spf13/cobra"
+
 	"github.com/naiba/cloudssh/cmd/client/dao"
 	"github.com/naiba/cloudssh/internal/apiio"
 	"github.com/naiba/cloudssh/pkg/xcrypto"
-	"github.com/spf13/cobra"
 )
 
 // SignUpCmd ..
@@ -53,18 +56,20 @@ func signup(cmd *cobra.Command, args []string) {
 		return
 	}
 	req.EncryptKey = encKey.ToString()
-	prikey, pubkey, err := xcrypto.GenerateKeyPair(2048)
-	if err != nil {
-		log.Println("GenerateKeyPair", err)
+
+	publicKey := bytes.NewBufferString("")
+	privateKey := bytes.NewBufferString("")
+
+	if err := xrsa.CreateKeys(publicKey, privateKey, 2048); err != nil {
 		return
 	}
-	req.Privatekey = string(xcrypto.PrivateKeyToBytes(prikey))
-	pubkeyByte, err := xcrypto.PublicKeyToBytes(pubkey)
+	cs, err := xcrypto.Encrypt(privateKey.Bytes(), dao.Conf.MasterKey)
 	if err != nil {
-		log.Println("PublicKeyToBytes", err)
+		log.Println("xcrypto.Encrypt", err)
 		return
 	}
-	req.Pubkey = string(pubkeyByte)
+	req.Privatekey = cs.ToString()
+	req.Pubkey = string(publicKey.Bytes())
 	body, err := dao.API.Do("/auth/signup", "POST", req)
 	if err != nil {
 		log.Println("API Request", err)

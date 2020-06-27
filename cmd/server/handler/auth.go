@@ -10,7 +10,6 @@ import (
 	"github.com/naiba/cloudssh/internal/apiio"
 	"github.com/naiba/cloudssh/internal/model"
 	"github.com/naiba/cloudssh/pkg/validator"
-	"github.com/naiba/cloudssh/pkg/xcrypto"
 )
 
 // Logout ..
@@ -43,10 +42,6 @@ func SignUp(c *fiber.Ctx) {
 		return
 	}
 
-	if _, err := xcrypto.BytesToPublicKey([]byte(req.Pubkey)); err != nil {
-		c.Next(err)
-		return
-	}
 	var user model.User
 	user.Email = req.Email
 	var ph []byte

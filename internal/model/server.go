@@ -16,12 +16,12 @@ const (
 type Server struct {
 	Common
 
-	Name      string
-	IP        string
-	Port      string
-	LoginUser string
-	LoginWith string
-	Key       string `gorm:"type:text"` // password or authorized key
+	Name      string `gorm:"type:text"` // encrypted
+	IP        string `gorm:"type:text"` // encrypted
+	Port      string `gorm:"type:text"` // encrypted
+	LoginUser string `gorm:"type:text"` // encrypted
+	LoginWith string `gorm:"type:text"` // encrypted
+	Key       string `gorm:"type:text"` // encrypted
 
 	OwnerType uint
 	OwnerID   uint64

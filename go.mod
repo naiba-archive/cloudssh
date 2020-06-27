@@ -8,6 +8,7 @@ require (
 	github.com/gofiber/fiber v1.12.0
 	github.com/gofiber/logger v0.2.2
 	github.com/jinzhu/gorm v1.9.14
+	github.com/liamylian/x-rsa v0.9.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/olekukonko/tablewriter v0.0.4
 	github.com/shiena/ansicolor v0.0.0-20151119151921-a422bbe96644

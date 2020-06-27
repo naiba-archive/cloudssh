@@ -1,6 +1,8 @@
 package server
 
 import (
+	"log"
+
 	"github.com/naiba/cloudssh/cmd/client/dao"
 	"github.com/spf13/cobra"
 )
@@ -17,5 +19,10 @@ func init() {
 }
 
 func create(cmd *cobra.Command, args []string) {
-	dao.API.CreateServer(0)
+	orgID, _ := cmd.Parent().Parent().PersistentFlags().GetUint64("oid")
+	if orgID == 0 {
+		log.Println("must set organization ID")
+		return
+	}
+	dao.API.CreateServer(orgID)
 }

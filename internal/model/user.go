@@ -16,7 +16,7 @@ type User struct {
 	PasswordHash string `json:"-"`
 	EncryptKey   string `json:"encrypt_key,omitempty"`
 	Pubkey       string `json:"pubkey,omitempty"`
-	Privatekey   string `json:"privatekey,omitempty"`
+	Privatekey   string `gorm:"type:text" json:"privatekey,omitempty"` // encrypted
 
 	Token        string    `json:"token,omitempty" gorm:"type:varchar(100);unique_index"`
 	TokenExpires time.Time `json:"token_expires,omitempty"`

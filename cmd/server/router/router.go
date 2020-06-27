@@ -25,7 +25,7 @@ func Serve(conf string, port int) {
 	if dao.Conf.Debug {
 		dao.DB = dao.DB.Debug()
 	}
-	if err := dao.DB.AutoMigrate(&model.User{}, &model.Organization{}, &model.Server{}, &model.OrganizationMember{}, &model.ServerOrganization{}).Error; err != nil {
+	if err := dao.DB.AutoMigrate(&model.User{}, &model.Organization{}, &model.Server{}, &model.OrganizationUser{}).Error; err != nil {
 		panic(err)
 	}
 
@@ -52,6 +52,15 @@ func Serve(conf string, port int) {
 	server.Patch("/:id", handler.EditServer)
 	server.Get("/:id", handler.GetServer)
 	server.Get("/", handler.ListServer)
+
+	org := app.Group("/organization", middleware.Protected)
+	org.Post("/", handler.CreateOrg)
+	org.Get("/:id", handler.GetOrganization)
+	org.Post("/:id/user", handler.AddOrganizationUser)
+	org.Get("/:id/server", handler.ListOrganizationServer)
+
+	user := app.Group("/user", middleware.Protected)
+	user.Get("/:id", handler.GetUserInfo)
 
 	app.Listen(port)
 }

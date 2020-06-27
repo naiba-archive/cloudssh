@@ -61,6 +61,17 @@ func login(cmd *cobra.Command, args []string) {
 		log.Println("API Request", resp.Message)
 		return
 	}
+	cs, err := xcrypto.NewCipherString(resp.Data.Privatekey)
+	if err != nil {
+		log.Println("NewCipherString", err)
+		return
+	}
+	pb, err := cs.Decrypt(dao.Conf.MasterKey)
+	if err != nil {
+		log.Println("Decrypt", err)
+		return
+	}
+	resp.Data.Privatekey = string(pb)
 	dao.Conf.User = resp.Data
 	err = dao.Conf.Save()
 	log.Println("Login Success", "ID", resp.Data.ID, resp.Data.Email, err)

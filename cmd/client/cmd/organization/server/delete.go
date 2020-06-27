@@ -1,6 +1,8 @@
 package server
 
 import (
+	"log"
+
 	"github.com/naiba/cloudssh/cmd/client/dao"
 	"github.com/spf13/cobra"
 )
@@ -18,6 +20,11 @@ func init() {
 }
 
 func delete(cmd *cobra.Command, args []string) {
+	orgID, _ := cmd.Parent().Parent().PersistentFlags().GetUint64("oid")
+	if orgID == 0 {
+		log.Println("must set organization ID")
+		return
+	}
 	id, _ := cmd.Flags().GetUintSlice("id")
-	dao.API.BatchDeleteServer(id, 0)
+	dao.API.BatchDeleteServer(id, orgID)
 }

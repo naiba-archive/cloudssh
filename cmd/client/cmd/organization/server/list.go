@@ -5,10 +5,9 @@ import (
 	"log"
 	"os"
 
+	"github.com/naiba/cloudssh/cmd/client/dao"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
-
-	"github.com/naiba/cloudssh/cmd/client/dao"
 )
 
 // ListCmd ..
@@ -17,13 +16,18 @@ var ListCmd *cobra.Command
 func init() {
 	ListCmd = &cobra.Command{
 		Use:   "list",
-		Short: "List servers",
+		Short: "List server",
 	}
 	ListCmd.Run = list
 }
 
 func list(cmd *cobra.Command, args []string) {
-	servers, err := dao.API.GetServers(0)
+	orgID, _ := cmd.Parent().Parent().PersistentFlags().GetUint64("oid")
+	if orgID == 0 {
+		log.Println("must set organization ID")
+		return
+	}
+	servers, err := dao.API.GetServers(orgID)
 	if err != nil {
 		log.Println("API.GetServers", err)
 		return

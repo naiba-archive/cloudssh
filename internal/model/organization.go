@@ -4,6 +4,6 @@ package model
 type Organization struct {
 	Common
 
-	Name   string
-	Pubkey string
+	Name   string `gorm:"type:text"` // pubkey encrypted
+	Pubkey string `gorm:"type:text"`
 }

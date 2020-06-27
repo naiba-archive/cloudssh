@@ -17,5 +17,5 @@ func InitDB(dsn string) error {
 
 // FindIDResp ..
 type FindIDResp struct {
-	ID []uint64
+	ID int64
 }
