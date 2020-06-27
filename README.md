@@ -21,27 +21,27 @@ go run cmd/client/main.go server list
 
 ## TODO
 
-- [ ] account
+- [x] account
   - [x] sign up
   - [x] login in, keep user status at client
   - [x] logout
-  - [ ] change password
+  - [x] change password
 - [x] server
   - [x] create server
   - [x] list server
   - [x] connect to server
   - [x] delete server
   - [x] update server
-- [ ] organization
+- [x] organization
   - [x] create organization
-  - [ ] edit organization
-  - [ ] delete organization
-  - [ ] add user
-  - [ ] edit user permission
-  - [ ] delete user
+  - [x] edit organization
+  - [x] delete organization
+  - [x] add user
+  - [x] delete user
   - [x] add server
   - [x] edit server
   - [x] delete server
+- [ ] default guide page
 
 Thanks for those awesome work:
 

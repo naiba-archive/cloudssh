@@ -15,7 +15,7 @@ type User struct {
 	Email        string `json:"email,omitempty" gorm:"type:varchar(100);unique_index"`
 	PasswordHash string `json:"-"`
 	EncryptKey   string `json:"encrypt_key,omitempty"`
-	Pubkey       string `json:"pubkey,omitempty"`
+	Pubkey       string `gorm:"type:text" json:"pubkey,omitempty"`
 	Privatekey   string `gorm:"type:text" json:"privatekey,omitempty"` // encrypted
 
 	Token        string    `json:"token,omitempty" gorm:"type:varchar(100);unique_index"`

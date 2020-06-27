@@ -32,6 +32,22 @@ func init() {
 	API = &APIClient{}
 }
 
+// GetUser ..
+func (api *APIClient) GetUser(email string) (*apiio.UserInfoResponse, error) {
+	body, err := api.Do("/user/?email="+email, "GET", nil)
+	if err != nil {
+		return nil, err
+	}
+	var resp apiio.UserInfoResponse
+	if err = json.Unmarshal(body, &resp); err != nil {
+		return nil, err
+	}
+	if !resp.Success {
+		return nil, err
+	}
+	return &resp, nil
+}
+
 // EditServer ..
 func (api *APIClient) EditServer(id string) error {
 	body, err := api.Do("/server/"+id, "GET", nil)
@@ -63,7 +79,7 @@ func (api *APIClient) EditServer(id string) error {
 		}
 	}
 
-	fmt.Print("!! let section empty will not change !!")
+	fmt.Println("!! let section empty will not change !!")
 	fmt.Printf("Server IP(%s): ", resp.Data.IP)
 	fmt.Scanf("%s", &req.IP)
 	if req.IP == "" {
@@ -437,9 +453,6 @@ func (api *APIClient) Do(url, method string, data interface{}) ([]byte, error) {
 // GetOrganizationXRsa ..
 func (api *APIClient) GetOrganizationXRsa(id uint64) (*xrsa.XRsa, error) {
 	info, err := api.GetOrganizationByID(id)
-	if err != nil {
-		return nil, err
-	}
 	if err != nil {
 		return nil, err
 	}

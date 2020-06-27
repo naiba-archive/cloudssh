@@ -46,14 +46,14 @@ func SignUp(c *fiber.Ctx) {
 	user.Email = req.Email
 	var ph []byte
 	ph, err := bcrypt.GenerateFromPassword([]byte(req.PasswordHash), 14)
-	user.PasswordHash = string(ph)
-	user.EncryptKey = req.EncryptKey
-	user.Privatekey = req.Privatekey
-	user.Pubkey = req.Pubkey
 	if err != nil {
 		c.Next(err)
 		return
 	}
+	user.PasswordHash = string(ph)
+	user.EncryptKey = req.EncryptKey
+	user.Privatekey = req.Privatekey
+	user.Pubkey = req.Pubkey
 	if err := user.RefreshToken(); err != nil {
 		c.Next(err)
 		return
@@ -62,7 +62,7 @@ func SignUp(c *fiber.Ctx) {
 		c.Next(err)
 		return
 	}
-	c.JSON(apiio.RegisterResponse{
+	c.JSON(apiio.UserResponse{
 		Response: apiio.Response{
 			Success: true,
 		},
@@ -98,7 +98,7 @@ func Login(c *fiber.Ctx) {
 		c.Next(err)
 		return
 	}
-	c.JSON(apiio.RegisterResponse{
+	c.JSON(apiio.UserResponse{
 		Response: apiio.Response{
 			Success: true,
 		},

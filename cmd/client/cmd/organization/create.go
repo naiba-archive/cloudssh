@@ -24,23 +24,23 @@ func init() {
 }
 
 func create(cmd *cobra.Command, args []string) {
-	var req apiio.OrgRequrest
+	var req apiio.NewOrgRequrest
 
 	fmt.Print("Organization Name: ")
 	fmt.Scanf("%s", &req.Name)
 
-	publicKey := bytes.NewBufferString("")
-	privateKey := bytes.NewBufferString("")
-
+	publicKey, privateKey := bytes.NewBufferString(""), bytes.NewBufferString("")
 	if err := xrsa.CreateKeys(publicKey, privateKey, 2048); err != nil {
+		log.Println("CreateKeys", err)
 		return
 	}
-	req.Pubkey = string(publicKey.Bytes())
+	req.Pubkey = publicKey.String()
 	xr, err := dao.Conf.GerUserXRsa()
 	if err != nil {
+		log.Println("GerUserXRsa", err)
 		return
 	}
-	req.Prikey, err = xr.PublicEncrypt(string(privateKey.Bytes()))
+	req.Prikey, err = xr.PublicEncrypt(privateKey.String())
 	if err != nil {
 		log.Println("EncryptWithPublicKey", err)
 		return
@@ -48,6 +48,7 @@ func create(cmd *cobra.Command, args []string) {
 
 	orgXr, err := xrsa.NewXRsa(publicKey.Bytes(), privateKey.Bytes())
 	if err != nil {
+		log.Println("NewXRsa", err)
 		return
 	}
 

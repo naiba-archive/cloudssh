@@ -21,6 +21,7 @@ func init() {
 	rootCmd.AddCommand(cmd.LoginCmd)
 	rootCmd.AddCommand(cmd.OrganizationCmd)
 	rootCmd.AddCommand(cmd.ServerCmd)
+	rootCmd.AddCommand(cmd.PasswdCmd)
 }
 
 func main() {

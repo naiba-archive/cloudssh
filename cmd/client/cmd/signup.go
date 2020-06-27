@@ -57,9 +57,7 @@ func signup(cmd *cobra.Command, args []string) {
 	}
 	req.EncryptKey = encKey.ToString()
 
-	publicKey := bytes.NewBufferString("")
-	privateKey := bytes.NewBufferString("")
-
+	publicKey, privateKey := bytes.NewBufferString(""), bytes.NewBufferString("")
 	if err := xrsa.CreateKeys(publicKey, privateKey, 2048); err != nil {
 		return
 	}
@@ -69,13 +67,13 @@ func signup(cmd *cobra.Command, args []string) {
 		return
 	}
 	req.Privatekey = cs.ToString()
-	req.Pubkey = string(publicKey.Bytes())
+	req.Pubkey = publicKey.String()
 	body, err := dao.API.Do("/auth/signup", "POST", req)
 	if err != nil {
 		log.Println("API Request", err)
 		return
 	}
-	var resp apiio.RegisterResponse
+	var resp apiio.UserResponse
 	if err = json.Unmarshal(body, &resp); err != nil {
 		log.Println("API Request", req, string(body), err)
 		return

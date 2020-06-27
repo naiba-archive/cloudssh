@@ -55,12 +55,19 @@ func Serve(conf string, port int) {
 
 	org := app.Group("/organization", middleware.Protected)
 	org.Post("/", handler.CreateOrg)
+	org.Get("/", handler.ListOrganization)
 	org.Get("/:id", handler.GetOrganization)
-	org.Post("/:id/user", handler.AddOrganizationUser)
+	org.Post("/batch-delete", handler.BatchDeleteOrganization)
 	org.Get("/:id/server", handler.ListOrganizationServer)
+	org.Get("/:id/user", handler.ListOrganizationUser)
+	org.Post("/:id/user/batch-delete", handler.BatchDeleteOrganizationUser)
+	org.Post("/:id/user", handler.AddOrganizationUser)
+	org.Patch("/:id", handler.UpdateOrganization)
 
 	user := app.Group("/user", middleware.Protected)
-	user.Get("/:id", handler.GetUserInfo)
+	user.Get("/", handler.GetUserInfo)
+	user.Post("/passwd", handler.Passwd)
+	user.Get("/organization", handler.ListAllOrganizationUser)
 
 	app.Listen(port)
 }

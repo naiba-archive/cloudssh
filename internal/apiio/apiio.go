@@ -26,8 +26,8 @@ type RegisterRequest struct {
 	Pubkey     string `valiadte:"required,min=10"`
 }
 
-// RegisterResponse ..
-type RegisterResponse struct {
+// UserResponse ..
+type UserResponse struct {
 	Response
 	Data model.User
 }
@@ -56,6 +56,30 @@ type ListServerResponse struct {
 	Data []model.Server
 }
 
+// ListOrganizationResponse ..
+type ListOrganizationResponse struct {
+	Response
+	Data struct {
+		Orgnazation []model.Organization
+		Permission  map[uint64]uint64
+	}
+}
+
+// ListOrganizationUserResponse ..
+type ListOrganizationUserResponse struct {
+	Response
+	Data struct {
+		User  []model.OrganizationUser
+		Key   map[uint64]string
+		Email map[uint64]string
+	}
+}
+
+// DeleteOrganizationRequest ..
+type DeleteOrganizationRequest struct {
+	ID []uint
+}
+
 // DeleteServerRequest ..
 type DeleteServerRequest struct {
 	ID             []uint
@@ -70,6 +94,14 @@ type GetServerResponse struct {
 
 // OrgRequrest ..
 type OrgRequrest struct {
+	Name    string
+	Pubkey  string
+	Servers []model.Server
+	Users   []model.OrganizationUser
+}
+
+// NewOrgRequrest ..
+type NewOrgRequrest struct {
 	Name   string
 	Pubkey string
 	Prikey string
@@ -95,7 +127,18 @@ type GetUserOrganizationInfoResponse struct {
 
 // AddOrganizationUserRequest ..
 type AddOrganizationUserRequest struct {
-	OrganizationID uint64
-	Permission     uint
-	Email          string
+	Permission uint64
+	Email      string
+	Prikey     string
+}
+
+// PasswdRequest ..
+type PasswdRequest struct {
+	OldPasswordHash  string
+	PasswordHash     string
+	EncryptKey       string
+	Pubkey           string
+	Privatekey       string
+	OrganizationUser []model.OrganizationUser
+	Server           []model.Server
 }

@@ -17,4 +17,8 @@ func init() {
 	OrganizationCmd.PersistentFlags().Uint64P("oid", "o", 0, "organization id")
 	OrganizationCmd.AddCommand(organization.CreateCmd)
 	OrganizationCmd.AddCommand(organization.ServerCmd)
+	OrganizationCmd.AddCommand(organization.EditCmd)
+	OrganizationCmd.AddCommand(organization.UserCmd)
+	OrganizationCmd.AddCommand(organization.DeleteCmd)
+	OrganizationCmd.AddCommand(organization.ListCmd)
 }
