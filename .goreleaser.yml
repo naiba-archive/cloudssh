@@ -9,7 +9,7 @@ before:
 builds:
   - env:
       - CGO_ENABLED=0
-    id: "build-client"
+    id: "cloudssh-client"
     dir: cmd/client
     binary: cssh
     ldflags:
@@ -28,7 +28,7 @@ builds:
       - 7
   - env:
       - CGO_ENABLED=0
-    id: "build-server"
+    id: "cloudssh-server"
     dir: cmd/server
     binary: server
     ldflags:
