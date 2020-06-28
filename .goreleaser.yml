@@ -50,7 +50,7 @@ dockers:
     dockerfile: Dockerfile
     build_flag_templates:
       - "--pull"
-      - "--no-catch"
+      - "--no-cache"
       - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.name={{.ProjectName}}"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
