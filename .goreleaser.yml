@@ -1,6 +1,5 @@
 # This is an example goreleaser.yaml file with some sane defaults.
 # Make sure to check the documentation at http://goreleaser.com
-project: CloudSSH
 before:
   hooks:
     # You may remove this if you don't use go modules.
@@ -47,11 +46,8 @@ dockers:
   - image_templates:
       - "docker.pkg.github.com/naiba/dockerfiles/cloudssh:latest"
       - "docker.pkg.github.com/naiba/dockerfiles/cloudssh:{{ .Tag }}"
-
     skip_push: false
-
     dockerfile: Dockerfile
-
     build_flag_templates:
       - "--pull"
       - "--no-catch"
