@@ -14,17 +14,27 @@ builds:
     ldflags:
       - -s -w
     goos:
-      # - freebsd
-      # - windows
+      - freebsd
+      - windows
       - darwin
-      # - linux
+      - linux
     goarch:
       - amd64
-      # - arm
-      # - arm64
+      - arm
+      - arm64
     goarm:
       - 6
       - 7
+  - env:
+      - CGO_ENABLED=0
+    dir: cmd/server
+    binary: server
+    ldflags:
+      - -s -w
+    goos:
+      - linux
+    goarch:
+      - amd64
 archives:
   - replacements:
       darwin: Darwin
@@ -46,6 +56,8 @@ dockers:
   - image_templates:
       - "docker.pkg.github.com/naiba/dockerfiles/cloudssh:latest"
       - "docker.pkg.github.com/naiba/dockerfiles/cloudssh:{{ .Tag }}"
+    binaries:
+      - server
     skip_push: false
     dockerfile: Dockerfile
     build_flag_templates:
@@ -55,3 +67,5 @@ dockers:
       - "--label=org.opencontainers.image.name={{.ProjectName}}"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
+    extra_files:
+      - resource
