@@ -78,9 +78,10 @@
                     </h1>
                     <ul class="list-unstyled mt-3 mb-4">
                         <li>SignUp:<code>cssh signup -s https://ssh.example.com</code></li>
+                        <li>Login:<code>cssh login -s https://ssh.example.com -u hi@example.com -p thisispassword</code>
+                        </li>
                         <li>Logout:<code>cssh logout -f</code></li>
-                        <li>Priority email support</li>
-                        <li>Help center access</li>
+                        <li>Help:<code>cssh help</code></li>
                     </ul>
                     <a href="#start" class="btn btn-lg btn-block btn-primary">Get started</a>
                 </div>
@@ -112,9 +113,10 @@
                     </h1>
                     <ul class="list-unstyled mt-3 mb-4">
                         <li>Create:<code>cssh org create</code></li>
+                        <li>Add User:<code>cssh org -o1 user add</code></li>
                         <li>List Server:<code>cssh org -o1 server list</code></li>
-                        <li>Phone and email support</li>
-                        <li>Help center access</li>
+                        <li>Edit Server:<code>cssh org -o1 server edit -i1</code></li>
+                        <li>Dial Server:<code>cssh org -o1 server dial -i1</code></li>
                     </ul>
                     <a href="#start" class="btn btn-lg btn-block btn-primary">Self-Host</a>
                 </div>
@@ -123,7 +125,8 @@
 
         <div class="jumbotron" id="start">
             <p class="lead">
-                You can directly use the server instance we maintain, just download the client and execute a few simple
+                You can directly use the server instance we maintain, just <a
+                    href="https://github.com/naiba/cloudssh/releases">download the client</a> and execute a few simple
                 commands.<br>
                 Start here now:
                 <code>cssh signup -s <span id="host"></span> -u hi@example.com -p thisispassword</code><br>
@@ -135,9 +138,10 @@
                 </code>
             </p>
             <hr class="my-4">
-            <p>You can self-host from the github source code.</p>
+            <p>You can self-host from the source code.</p>
             <p class="lead">
-                <a class="btn btn-primary btn-lg" href="https://github.com/naiba/cloudssh" role="button" target="_blank">Source code</a>
+                <a class="btn btn-primary btn-lg" href="https://github.com/naiba/cloudssh" role="button"
+                    target="_blank">Source code</a>
             </p>
         </div>
 
