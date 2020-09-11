@@ -1,47 +1,6 @@
-# CloudSSH
-
-:cloud: SSH key cloud management tool inspired by Bitwarden.
-
 ## Usage
 
-### Server
-
-```shell
-go run cmd/server/main.go
-```
-
-### Client
-
-```shell
-go run cmd/client/main.go -h
-go run cmd/client/main.go signup -s http://localhost -u hi@example.com -p password
-go run cmd/client/main.go server -h
-go run cmd/client/main.go server list
-```
-
-## TODO
-
-- [x] account
-  - [x] sign up
-  - [x] login in, keep user status at client
-  - [x] logout
-  - [x] change password
-- [x] server
-  - [x] create server
-  - [x] list server
-  - [x] connect to server
-  - [x] delete server
-  - [x] update server
-- [x] organization
-  - [x] create organization
-  - [x] edit organization
-  - [x] delete organization
-  - [x] add user
-  - [x] delete user
-  - [x] add server
-  - [x] edit server
-  - [x] delete server
-- [x] default guide page
+To be done ...
 
 Thanks for those awesome work:
 

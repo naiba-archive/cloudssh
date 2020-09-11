@@ -2,6 +2,7 @@ package router
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/gofiber/fiber"
@@ -42,7 +43,7 @@ func Serve(conf string, port int) {
 	app.Use(middleware.Auth)
 
 	app.Get("/", func(c *fiber.Ctx) {
-		c.Render("resource/template/index.html", nil)
+		c.Redirect("https://naiba.github.io/cloudssh", http.StatusTemporaryRedirect)
 	})
 
 	auth := app.Group("/auth")
