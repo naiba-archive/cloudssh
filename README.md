@@ -1,6 +1,6 @@
-## Usage
+:cloud: SSH key cloud management tool inspired by Bitwarden.
 
-To be done ...
+To be done...
 
 Thanks for those awesome work:
 
