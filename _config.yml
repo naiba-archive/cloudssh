@@ -1,3 +1,5 @@
 theme: jekyll-theme-primer
 title: CloudSSH
 description: ":cloud: SSH key cloud management tool inspired by Bitwarden."
+plugins:
+    - jemoji
