@@ -1,10 +1,6 @@
-# This is an example goreleaser.yaml file with some sane defaults.
-# Make sure to check the documentation at http://goreleaser.com
 before:
   hooks:
-    # You may remove this if you don't use go modules.
     - go mod download
-    # you may remove this if you don't need go generate
     - go generate ./...
 builds:
   - env:
@@ -56,8 +52,8 @@ changelog:
       - "^test:"
 dockers:
   - image_templates:
-      - "docker.pkg.github.com/naiba/dockerfiles/cloudssh:latest"
       - "docker.pkg.github.com/naiba/dockerfiles/cloudssh:{{ .Tag }}"
+      - "docker.pkg.github.com/naiba/dockerfiles/cloudssh:latest"
     binaries:
       - server
     skip_push: false
