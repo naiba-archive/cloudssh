@@ -1,9 +1,9 @@
-package organization
+package team
 
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/naiba/cloudssh/cmd/client/cmd/organization/server"
+	"github.com/naiba/cloudssh/cmd/client/cmd/team/server"
 )
 
 // ServerCmd ..
@@ -12,7 +12,7 @@ var ServerCmd *cobra.Command
 func init() {
 	ServerCmd = &cobra.Command{
 		Use:   "server",
-		Short: "manage organization servers",
+		Short: "manage team servers",
 	}
 	ServerCmd.AddCommand(server.CreateCmd)
 	ServerCmd.AddCommand(server.ListCmd)

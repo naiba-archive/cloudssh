@@ -10,10 +10,10 @@ const (
 	OUPermissionOwner
 )
 
-// OrganizationUser ..
-type OrganizationUser struct {
+// TeamUser ..
+type TeamUser struct {
 	UserID         uint64 `gorm:"PRIMARY_KEY;AUTO_INCREMENT:false"`
-	OrganizationID uint64 `gorm:"PRIMARY_KEY;AUTO_INCREMENT:false"`
+	TeamID uint64 `gorm:"PRIMARY_KEY;AUTO_INCREMENT:false"`
 	Permission     uint64
 
 	PrivateKey string `gorm:"type:text"` // encrypted

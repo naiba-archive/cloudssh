@@ -19,24 +19,24 @@ var ListCmd *cobra.Command
 func init() {
 	ListCmd = &cobra.Command{
 		Use:   "list",
-		Short: "list users from organization",
+		Short: "list users from team",
 	}
 	ListCmd.Run = list
 }
 
 func list(cmd *cobra.Command, args []string) {
-	orgID, _ := cmd.Parent().Parent().PersistentFlags().GetUint64("oid")
-	if orgID == 0 {
-		log.Println("must set organization ID")
+	teamID, _ := cmd.Parent().Parent().PersistentFlags().GetUint64("oid")
+	if teamID == 0 {
+		log.Println("must set team ID")
 		return
 	}
 
-	body, err := dao.API.Do(fmt.Sprintf("/organization/%d/user", orgID), "GET", nil)
+	body, err := dao.API.Do(fmt.Sprintf("/team/%d/user", teamID), "GET", nil)
 	if err != nil {
 		log.Println("API Request", err)
 		return
 	}
-	var resp apiio.ListOrganizationUserResponse
+	var resp apiio.ListTeamUserResponse
 	if err = json.Unmarshal(body, &resp); err != nil {
 		log.Println("API Request", string(body), err)
 		return

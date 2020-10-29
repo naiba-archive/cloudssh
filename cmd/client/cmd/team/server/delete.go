@@ -20,11 +20,11 @@ func init() {
 }
 
 func delete(cmd *cobra.Command, args []string) {
-	orgID, _ := cmd.Parent().Parent().PersistentFlags().GetUint64("oid")
-	if orgID == 0 {
-		log.Println("must set organization ID")
+	teamID, _ := cmd.Parent().Parent().PersistentFlags().GetUint64("oid")
+	if teamID == 0 {
+		log.Println("must set team ID")
 		return
 	}
 	id, _ := cmd.Flags().GetUintSlice("id")
-	dao.API.BatchDeleteServer(id, orgID)
+	dao.API.BatchDeleteServer(id, teamID)
 }

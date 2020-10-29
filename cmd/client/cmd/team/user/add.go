@@ -18,18 +18,18 @@ var AddCmd *cobra.Command
 func init() {
 	AddCmd = &cobra.Command{
 		Use:   "add",
-		Short: "Add user to organization",
+		Short: "Add user to team",
 	}
 	AddCmd.Run = add
 }
 
 func add(cmd *cobra.Command, args []string) {
-	orgID, _ := cmd.Parent().Parent().PersistentFlags().GetUint64("oid")
-	if orgID == 0 {
-		log.Println("must set organization ID")
+	teamID, _ := cmd.Parent().Parent().PersistentFlags().GetUint64("oid")
+	if teamID == 0 {
+		log.Println("must set team ID")
 		return
 	}
-	var req apiio.AddOrganizationUserRequest
+	var req apiio.AddTeamUserRequest
 
 	fmt.Print("User Email: ")
 	fmt.Scanf("%s", &req.Email)
@@ -57,9 +57,9 @@ func add(cmd *cobra.Command, args []string) {
 		log.Println("NewXRsa", err)
 		return
 	}
-	info, err := dao.API.GetOrganizationByID(orgID)
+	info, err := dao.API.GetTeamByID(teamID)
 	if err != nil {
-		log.Println("GetOrganizationByID", err)
+		log.Println("GetTeamByID", err)
 		return
 	}
 	xr, err := dao.Conf.GerUserXRsa()
@@ -67,18 +67,18 @@ func add(cmd *cobra.Command, args []string) {
 		log.Println("GerUserXRsa", err)
 		return
 	}
-	orgPkStr, err := xr.PrivateDecrypt(info.OrganizationUser.PrivateKey)
+	teamPkStr, err := xr.PrivateDecrypt(info.TeamUser.PrivateKey)
 	if err != nil {
 		log.Println("PrivateDecrypt", err)
 		return
 	}
-	req.Prikey, err = userXr.PublicEncrypt(orgPkStr)
+	req.Prikey, err = userXr.PublicEncrypt(teamPkStr)
 	if err != nil {
 		log.Println("PublicEncrypt", err)
 		return
 	}
 
-	body, err := dao.API.Do(fmt.Sprintf("/organization/%d/user", orgID), "POST", req)
+	body, err := dao.API.Do(fmt.Sprintf("/team/%d/user", teamID), "POST", req)
 	if err != nil {
 		log.Println("API Request", err)
 		return

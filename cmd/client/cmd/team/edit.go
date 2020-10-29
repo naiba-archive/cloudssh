@@ -1,4 +1,4 @@
-package organization
+package team
 
 import (
 	"bytes"
@@ -19,23 +19,23 @@ var EditCmd *cobra.Command
 func init() {
 	EditCmd = &cobra.Command{
 		Use:   "edit",
-		Short: "Edit organization",
+		Short: "Edit team",
 	}
 	EditCmd.Run = edit
 }
 
 func edit(cmd *cobra.Command, args []string) {
-	orgID, _ := cmd.Parent().PersistentFlags().GetUint64("oid")
-	if orgID == 0 {
-		log.Println("must set organization ID")
+	teamID, _ := cmd.Parent().PersistentFlags().GetUint64("oid")
+	if teamID == 0 {
+		log.Println("must set team ID")
 		return
 	}
-	body, err := dao.API.Do(fmt.Sprintf("/organization/%d", orgID), "GET", nil)
+	body, err := dao.API.Do(fmt.Sprintf("/team/%d", teamID), "GET", nil)
 	if err != nil {
-		log.Println("API GetOrganization", err)
+		log.Println("API GetTeam", err)
 		return
 	}
-	var resp apiio.GetOrganizationResponse
+	var resp apiio.GetTeamResponse
 	if err = json.Unmarshal(body, &resp); err != nil {
 		log.Println("Unmarshal Response", err)
 		return
@@ -45,22 +45,22 @@ func edit(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	oldOrganizationXr, err := dao.API.GetOrganizationXRsa(orgID)
+	oldTeamXr, err := dao.API.GetTeamXRsa(teamID)
 	if err != nil {
-		log.Println("GetOrganizationXRsa", err)
+		log.Println("GetTeamXRsa", err)
 		return
 	}
-	resp.Data.Organization.Name, err = oldOrganizationXr.PrivateDecrypt(resp.Data.Organization.Name)
+	resp.Data.Team.Name, err = oldTeamXr.PrivateDecrypt(resp.Data.Team.Name)
 	if err != nil {
 		log.Println("PrivateDecrypt", err)
 		return
 	}
-	var req apiio.OrgRequrest
+	var req apiio.TeamRequrest
 	fmt.Println("!! let section empty will not change !!")
-	fmt.Printf("Organization Name: (%s)", resp.Data.Organization.Name)
+	fmt.Printf("Team Name: (%s)", resp.Data.Team.Name)
 	fmt.Scanf("%s", &req.Name)
 	if req.Name == "" {
-		req.Name = resp.Data.Organization.Name
+		req.Name = resp.Data.Team.Name
 	}
 	var reset string
 	fmt.Print("Reset secret key (n/y):")
@@ -72,23 +72,23 @@ func edit(cmd *cobra.Command, args []string) {
 			return
 		}
 		req.Pubkey = publicKey.String()
-		newOrganizationXr, err := xrsa.NewXRsa(publicKey.Bytes(), privateKey.Bytes())
+		newTeamXr, err := xrsa.NewXRsa(publicKey.Bytes(), privateKey.Bytes())
 		if err != nil {
 			log.Println("NewXRsa", err)
 			return
 		}
-		req.Name, err = newOrganizationXr.PublicEncrypt(req.Name)
+		req.Name, err = newTeamXr.PublicEncrypt(req.Name)
 		if err != nil {
 			log.Println("PublicEncrypt", err)
 			return
 		}
-		// re encrypt organization_user data
-		body, err = dao.API.Do(fmt.Sprintf("/organization/%d/user", orgID), "GET", req)
+		// re encrypt team_user data
+		body, err = dao.API.Do(fmt.Sprintf("/team/%d/user", teamID), "GET", req)
 		if err != nil {
 			log.Println("API Request", err)
 			return
 		}
-		var respUser apiio.ListOrganizationUserResponse
+		var respUser apiio.ListTeamUserResponse
 		if err = json.Unmarshal(body, &respUser); err != nil {
 			log.Println("API Request", string(body), err)
 			return
@@ -120,28 +120,28 @@ func edit(cmd *cobra.Command, args []string) {
 			}
 			req.Users = append(req.Users, respUser.Data.User[i])
 		}
-		// re encrypt organization_server data
-		servers, err := dao.API.GetServers(orgID)
+		// re encrypt team_server data
+		servers, err := dao.API.GetServers(teamID)
 		if err != nil {
 			log.Println("GetServers", err)
 			return
 		}
 		for i := 0; i < len(servers); i++ {
-			if err := xcrypto.EncryptStructWithXRsa(&servers[i], newOrganizationXr); err != nil {
+			if err := xcrypto.EncryptStructWithXRsa(&servers[i], newTeamXr); err != nil {
 				log.Println("EncryptStructWithXRsa", err)
 				return
 			}
 			req.Servers = append(req.Servers, servers[i])
 		}
 	} else {
-		req.Name, err = oldOrganizationXr.PublicEncrypt(req.Name)
+		req.Name, err = oldTeamXr.PublicEncrypt(req.Name)
 		if err != nil {
 			log.Println("PublicEncrypt", err)
 			return
 		}
 	}
 
-	body, err = dao.API.Do(fmt.Sprintf("/organization/%d", orgID), "PATCH", req)
+	body, err = dao.API.Do(fmt.Sprintf("/team/%d", teamID), "PATCH", req)
 	if err != nil {
 		log.Println("API Request", err)
 		return

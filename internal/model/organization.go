@@ -1,7 +1,7 @@
 package model
 
-// Organization ..
-type Organization struct {
+// Team ..
+type Team struct {
 	Common
 
 	Name   string `gorm:"type:text"` // pubkey encrypted

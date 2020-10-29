@@ -24,14 +24,14 @@ func init() {
 func dial(cmd *cobra.Command, args []string) {
 	name, _ := cmd.Flags().GetString("name")
 	id, _ := cmd.Flags().GetString("id")
-	orgID, _ := cmd.Parent().Parent().PersistentFlags().GetUint64("oid")
+	teamID, _ := cmd.Parent().Parent().PersistentFlags().GetUint64("oid")
 	if name == "" && id == "" {
 		log.Println("You must set which server you want to connect")
 		return
 	}
-	if orgID == 0 {
-		log.Println("You must set organization id")
+	if teamID == 0 {
+		log.Println("You must set team id")
 		return
 	}
-	dao.API.DialServer(orgID, name, id)
+	dao.API.DialServer(teamID, name, id)
 }

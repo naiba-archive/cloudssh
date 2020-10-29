@@ -26,7 +26,7 @@ func Serve(conf string, port int) {
 	if dao.Conf.Debug {
 		dao.DB = dao.DB.Debug()
 	}
-	if err := dao.DB.AutoMigrate(&model.User{}, &model.Organization{}, &model.Server{}, &model.OrganizationUser{}).Error; err != nil {
+	if err := dao.DB.AutoMigrate(&model.User{}, &model.Team{}, &model.Server{}, &model.TeamUser{}).Error; err != nil {
 		panic(err)
 	}
 
@@ -58,21 +58,21 @@ func Serve(conf string, port int) {
 	server.Get("/:id", handler.GetServer)
 	server.Get("/", handler.ListServer)
 
-	org := app.Group("/organization", middleware.Protected)
-	org.Post("/", handler.CreateOrg)
-	org.Get("/", handler.ListOrganization)
-	org.Get("/:id", handler.GetOrganization)
-	org.Post("/batch-delete", handler.BatchDeleteOrganization)
-	org.Get("/:id/server", handler.ListOrganizationServer)
-	org.Get("/:id/user", handler.ListOrganizationUser)
-	org.Post("/:id/user/batch-delete", handler.BatchDeleteOrganizationUser)
-	org.Post("/:id/user", handler.AddOrganizationUser)
-	org.Patch("/:id", handler.UpdateOrganization)
+	team := app.Group("/team", middleware.Protected)
+	team.Post("/", handler.CreateTeam)
+	team.Get("/", handler.ListTeam)
+	team.Get("/:id", handler.GetTeam)
+	team.Post("/batch-delete", handler.BatchDeleteTeam)
+	team.Get("/:id/server", handler.ListTeamServer)
+	team.Get("/:id/user", handler.ListTeamUser)
+	team.Post("/:id/user/batch-delete", handler.BatchDeleteTeamUser)
+	team.Post("/:id/user", handler.AddTeamUser)
+	team.Patch("/:id", handler.UpdateTeam)
 
 	user := app.Group("/user", middleware.Protected)
 	user.Get("/", handler.GetUserInfo)
 	user.Post("/passwd", handler.Passwd)
-	user.Get("/organization", handler.ListAllOrganizationUser)
+	user.Get("/team", handler.ListAllTeamUser)
 
 	app.Listen(port)
 }

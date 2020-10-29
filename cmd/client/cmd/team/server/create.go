@@ -19,10 +19,10 @@ func init() {
 }
 
 func create(cmd *cobra.Command, args []string) {
-	orgID, _ := cmd.Parent().Parent().PersistentFlags().GetUint64("oid")
-	if orgID == 0 {
-		log.Println("must set organization ID")
+	teamID, _ := cmd.Parent().Parent().PersistentFlags().GetUint64("oid")
+	if teamID == 0 {
+		log.Println("must set team ID")
 		return
 	}
-	dao.API.CreateServer(orgID)
+	dao.API.CreateServer(teamID)
 }

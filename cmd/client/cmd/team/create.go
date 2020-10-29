@@ -1,4 +1,4 @@
-package organization
+package team
 
 import (
 	"bytes"
@@ -18,15 +18,15 @@ var CreateCmd *cobra.Command
 func init() {
 	CreateCmd = &cobra.Command{
 		Use:   "create",
-		Short: "Create organization",
+		Short: "Create team",
 	}
 	CreateCmd.Run = create
 }
 
 func create(cmd *cobra.Command, args []string) {
-	var req apiio.NewOrgRequrest
+	var req apiio.NewTeamRequrest
 
-	fmt.Print("Organization Name: ")
+	fmt.Print("Team Name: ")
 	fmt.Scanf("%s", &req.Name)
 
 	publicKey, privateKey := bytes.NewBufferString(""), bytes.NewBufferString("")
@@ -46,19 +46,19 @@ func create(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	orgXr, err := xrsa.NewXRsa(publicKey.Bytes(), privateKey.Bytes())
+	teamXr, err := xrsa.NewXRsa(publicKey.Bytes(), privateKey.Bytes())
 	if err != nil {
 		log.Println("NewXRsa", err)
 		return
 	}
 
-	req.Name, err = orgXr.PublicEncrypt(req.Name)
+	req.Name, err = teamXr.PublicEncrypt(req.Name)
 	if err != nil {
 		log.Println("Encrypt prikey", err)
 		return
 	}
 
-	body, err := dao.API.Do("/organization", "POST", req)
+	body, err := dao.API.Do("/team", "POST", req)
 	if err != nil {
 		log.Println("API Request", err)
 		return

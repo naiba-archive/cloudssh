@@ -15,14 +15,14 @@ import (
 func GetServer(c *fiber.Ctx) {
 	user := c.Locals("user").(model.User)
 
-	var organizationID []dao.FindIDResp
-	dao.DB.Model(&model.OrganizationUser{}).Select("organization_id as id").Where("user_id = ?", user.ID).Scan(&organizationID)
+	var teamID []dao.FindIDResp
+	dao.DB.Model(&model.TeamUser{}).Select("team_id as id").Where("user_id = ?", user.ID).Scan(&teamID)
 	var ids []int64
-	for i := 0; i < len(organizationID); i++ {
-		ids = append(ids, organizationID[i].ID)
+	for i := 0; i < len(teamID); i++ {
+		ids = append(ids, teamID[i].ID)
 	}
 	var server model.Server
-	if err := dao.DB.First(&server, "((owner_type = ? AND owner_id = ?) OR (owner_type = ? AND owner_id in (?))) AND id = ?", model.ServerOwnerTypeUser, user.ID, model.ServerOwnerTypeOrganization, ids, c.Params("id")).Error; err != nil {
+	if err := dao.DB.First(&server, "((owner_type = ? AND owner_id = ?) OR (owner_type = ? AND owner_id in (?))) AND id = ?", model.ServerOwnerTypeUser, user.ID, model.ServerOwnerTypeTeam, ids, c.Params("id")).Error; err != nil {
 		c.Next(err)
 		return
 	}
@@ -49,15 +49,15 @@ func EditServer(c *fiber.Ctx) {
 		return
 	}
 
-	var orgUser model.OrganizationUser
-	if req.OrganizationID > 0 {
-		if err := dao.DB.First(&orgUser, "organization_id = ? AND user_id = ? AND permission >= ?", req.OrganizationID, user.ID, model.OUPermissionReadWrite).Error; err != nil {
+	var teamUser model.TeamUser
+	if req.TeamID > 0 {
+		if err := dao.DB.First(&teamUser, "team_id = ? AND user_id = ? AND permission >= ?", req.TeamID, user.ID, model.OUPermissionReadWrite).Error; err != nil {
 			c.Next(err)
 			return
 		}
 	}
 	var server model.Server
-	if err := dao.DB.First(&server, "((owner_type = ? AND owner_id = ?) OR (owner_type = ? AND owner_id = ?)) AND id = ?", model.ServerOwnerTypeUser, user.ID, model.ServerOwnerTypeOrganization, orgUser.OrganizationID, c.Params("id")).Error; err != nil {
+	if err := dao.DB.First(&server, "((owner_type = ? AND owner_id = ?) OR (owner_type = ? AND owner_id = ?)) AND id = ?", model.ServerOwnerTypeUser, user.ID, model.ServerOwnerTypeTeam, teamUser.TeamID, c.Params("id")).Error; err != nil {
 		c.Next(err)
 		return
 	}
@@ -119,13 +119,13 @@ func BatchDelete(c *fiber.Ctx) {
 	}
 
 	var dbCount int
-	if req.OrganizationID > 0 {
-		var orgUser model.OrganizationUser
-		if err := dao.DB.First(&orgUser, "permission >= ? AND organization_id = ? AND user_id = ?", model.OUPermissionReadWrite, req.OrganizationID, user.ID).Error; err != nil {
+	if req.TeamID > 0 {
+		var teamUser model.TeamUser
+		if err := dao.DB.First(&teamUser, "permission >= ? AND team_id = ? AND user_id = ?", model.OUPermissionReadWrite, req.TeamID, user.ID).Error; err != nil {
 			c.Next(err)
 			return
 		}
-		dao.DB.Model(&model.Server{}).Where("owner_type = ? AND owner_id = ? AND id in (?)", model.ServerOwnerTypeOrganization, req.OrganizationID, req.ID).Count(&dbCount)
+		dao.DB.Model(&model.Server{}).Where("owner_type = ? AND owner_id = ? AND id in (?)", model.ServerOwnerTypeTeam, req.TeamID, req.ID).Count(&dbCount)
 	} else {
 		dao.DB.Model(&model.Server{}).Where("owner_type = ? AND owner_id = ? AND id in (?)", model.ServerOwnerTypeUser, user.ID, req.ID).Count(&dbCount)
 	}
@@ -159,15 +159,15 @@ func CreateServer(c *fiber.Ctx) {
 	}
 
 	var server model.Server
-	if req.OrganizationID > 0 {
+	if req.TeamID > 0 {
 		var count uint64
-		dao.DB.Model(&model.OrganizationUser{}).Where("user_id = ? AND organization_id = ? AND permission >= ?", user.ID, req.OrganizationID, model.OUPermissionReadWrite).Count(&count)
+		dao.DB.Model(&model.TeamUser{}).Where("user_id = ? AND team_id = ? AND permission >= ?", user.ID, req.TeamID, model.OUPermissionReadWrite).Count(&count)
 		if count == 0 {
-			c.Next(fmt.Errorf("You don't have permission to write organization(%d)", req.OrganizationID))
+			c.Next(fmt.Errorf("You don't have permission to write team(%d)", req.TeamID))
 			return
 		}
-		server.OwnerType = model.ServerOwnerTypeOrganization
-		server.OwnerID = req.OrganizationID
+		server.OwnerType = model.ServerOwnerTypeTeam
+		server.OwnerID = req.TeamID
 	} else {
 		server.OwnerType = model.ServerOwnerTypeUser
 		server.OwnerID = user.ID

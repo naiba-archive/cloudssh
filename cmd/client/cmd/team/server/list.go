@@ -22,12 +22,12 @@ func init() {
 }
 
 func list(cmd *cobra.Command, args []string) {
-	orgID, _ := cmd.Parent().Parent().PersistentFlags().GetUint64("oid")
-	if orgID == 0 {
-		log.Println("must set organization ID")
+	teamID, _ := cmd.Parent().Parent().PersistentFlags().GetUint64("oid")
+	if teamID == 0 {
+		log.Println("must set team ID")
 		return
 	}
-	servers, err := dao.API.GetServers(orgID)
+	servers, err := dao.API.GetServers(teamID)
 	if err != nil {
 		log.Println("API.GetServers", err)
 		return

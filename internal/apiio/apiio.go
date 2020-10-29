@@ -47,7 +47,7 @@ type ServerRequest struct {
 	LoginWith string `validate:"required,min=10"`
 	Key       string `validate:"required,min=10"`
 
-	OrganizationID uint64
+	TeamID uint64
 }
 
 // ListServerResponse ..
@@ -56,34 +56,34 @@ type ListServerResponse struct {
 	Data []model.Server
 }
 
-// ListOrganizationResponse ..
-type ListOrganizationResponse struct {
+// ListTeamResponse ..
+type ListTeamResponse struct {
 	Response
 	Data struct {
-		Orgnazation []model.Organization
-		Permission  map[uint64]uint64
+		Teamnazation []model.Team
+		Permission   map[uint64]uint64
 	}
 }
 
-// ListOrganizationUserResponse ..
-type ListOrganizationUserResponse struct {
+// ListTeamUserResponse ..
+type ListTeamUserResponse struct {
 	Response
 	Data struct {
-		User  []model.OrganizationUser
+		User  []model.TeamUser
 		Key   map[uint64]string
 		Email map[uint64]string
 	}
 }
 
-// DeleteOrganizationRequest ..
-type DeleteOrganizationRequest struct {
+// DeleteTeamRequest ..
+type DeleteTeamRequest struct {
 	ID []uint
 }
 
 // DeleteServerRequest ..
 type DeleteServerRequest struct {
-	ID             []uint
-	OrganizationID uint64
+	ID     []uint
+	TeamID uint64
 }
 
 // GetServerResponse ..
@@ -92,41 +92,41 @@ type GetServerResponse struct {
 	Data model.Server
 }
 
-// OrgRequrest ..
-type OrgRequrest struct {
+// TeamRequrest ..
+type TeamRequrest struct {
 	Name    string
 	Pubkey  string
 	Servers []model.Server
-	Users   []model.OrganizationUser
+	Users   []model.TeamUser
 }
 
-// NewOrgRequrest ..
-type NewOrgRequrest struct {
+// NewTeamRequrest ..
+type NewTeamRequrest struct {
 	Name   string
 	Pubkey string
 	Prikey string
 }
 
-// MyOrganizationInfo ..
-type MyOrganizationInfo struct {
-	Organization     model.Organization
-	OrganizationUser model.OrganizationUser
+// MyTeamInfo ..
+type MyTeamInfo struct {
+	Team     model.Team
+	TeamUser model.TeamUser
 }
 
-// GetOrganizationResponse ..
-type GetOrganizationResponse struct {
+// GetTeamResponse ..
+type GetTeamResponse struct {
 	Response
-	Data MyOrganizationInfo
+	Data MyTeamInfo
 }
 
-// GetUserOrganizationInfoResponse ..
-type GetUserOrganizationInfoResponse struct {
+// GetUserTeamInfoResponse ..
+type GetUserTeamInfoResponse struct {
 	Response
-	Data model.OrganizationUser
+	Data model.TeamUser
 }
 
-// AddOrganizationUserRequest ..
-type AddOrganizationUserRequest struct {
+// AddTeamUserRequest ..
+type AddTeamUserRequest struct {
 	Permission uint64
 	Email      string
 	Prikey     string
@@ -134,11 +134,11 @@ type AddOrganizationUserRequest struct {
 
 // PasswdRequest ..
 type PasswdRequest struct {
-	OldPasswordHash  string
-	PasswordHash     string
-	EncryptKey       string
-	Pubkey           string
-	Privatekey       string
-	OrganizationUser []model.OrganizationUser
-	Server           []model.Server
+	OldPasswordHash string
+	PasswordHash    string
+	EncryptKey      string
+	Pubkey          string
+	Privatekey      string
+	TeamUser        []model.TeamUser
+	Server          []model.Server
 }

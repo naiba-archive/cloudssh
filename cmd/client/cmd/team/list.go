@@ -1,4 +1,4 @@
-package organization
+package team
 
 import (
 	"encoding/json"
@@ -20,18 +20,18 @@ var ListCmd *cobra.Command
 func init() {
 	ListCmd = &cobra.Command{
 		Use:   "list",
-		Short: "List Organizations",
+		Short: "List Teams",
 	}
 	ListCmd.Run = list
 }
 
 func list(cmd *cobra.Command, args []string) {
-	body, err := dao.API.Do("/organization", "GET", nil)
+	body, err := dao.API.Do("/team", "GET", nil)
 	if err != nil {
 		log.Println("API", err)
 		return
 	}
-	var resp apiio.ListOrganizationResponse
+	var resp apiio.ListTeamResponse
 	if err = json.Unmarshal(body, &resp); err != nil {
 		log.Println("Unmarshal", string(body), err)
 		return
@@ -43,22 +43,22 @@ func list(cmd *cobra.Command, args []string) {
 
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"ID", "Name", "Permission", "CreatedAt"})
-	for i := 0; i < len(resp.Data.Orgnazation); i++ {
-		orgXrsa, err := dao.API.GetOrganizationXRsa(resp.Data.Orgnazation[i].ID)
+	for i := 0; i < len(resp.Data.Teamnazation); i++ {
+		teamXrsa, err := dao.API.GetTeamXRsa(resp.Data.Teamnazation[i].ID)
 		if err != nil {
-			log.Println("GetOrganizationXRsa", err)
+			log.Println("GetTeamXRsa", err)
 			return
 		}
-		resp.Data.Orgnazation[i].Name, err = orgXrsa.PrivateDecrypt(resp.Data.Orgnazation[i].Name)
+		resp.Data.Teamnazation[i].Name, err = teamXrsa.PrivateDecrypt(resp.Data.Teamnazation[i].Name)
 		if err != nil {
 			log.Println("PrivateDecrypt", err)
 			return
 		}
 		table.Append([]string{
-			fmt.Sprintf("%d", resp.Data.Orgnazation[i].ID),
-			resp.Data.Orgnazation[i].Name,
-			model.GetPermissionComment(resp.Data.Permission[resp.Data.Orgnazation[i].ID]),
-			resp.Data.Orgnazation[i].CreatedAt.String(),
+			fmt.Sprintf("%d", resp.Data.Teamnazation[i].ID),
+			resp.Data.Teamnazation[i].Name,
+			model.GetPermissionComment(resp.Data.Permission[resp.Data.Teamnazation[i].ID]),
+			resp.Data.Teamnazation[i].CreatedAt.String(),
 		})
 	}
 	table.Render()

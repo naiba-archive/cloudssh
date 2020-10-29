@@ -72,19 +72,19 @@ func passwd(cmd *cobra.Command, args []string) {
 	}
 	req.Server = append(req.Server, servers...)
 
-	// organization data
+	// team data
 	xr, err := xrsa.NewXRsa(publicKey.Bytes(), privateKey.Bytes())
 	if err != nil {
 		log.Println("NewXRsa", err)
 		return
 	}
-	body, err := dao.API.Do("/user/organization", "GET", nil)
+	body, err := dao.API.Do("/user/team", "GET", nil)
 	if err != nil {
 		log.Println("API.Do", err)
 		return
 	}
-	var orgs apiio.ListOrganizationUserResponse
-	if err = json.Unmarshal(body, &orgs); err != nil {
+	var teams apiio.ListTeamUserResponse
+	if err = json.Unmarshal(body, &teams); err != nil {
 		log.Println("Unmarshal", string(body), err)
 		return
 	}
@@ -93,19 +93,19 @@ func passwd(cmd *cobra.Command, args []string) {
 		log.Println("GerUserXRsa[old]", err)
 		return
 	}
-	for i := 0; i < len(orgs.Data.User); i++ {
-		orgs.Data.User[i].PrivateKey, err = oldXr.PrivateDecrypt(orgs.Data.User[i].PrivateKey)
+	for i := 0; i < len(teams.Data.User); i++ {
+		teams.Data.User[i].PrivateKey, err = oldXr.PrivateDecrypt(teams.Data.User[i].PrivateKey)
 		if err != nil {
 			log.Println("PublicEncrypt[old]", err)
 			return
 		}
-		orgs.Data.User[i].PrivateKey, err = xr.PublicEncrypt(orgs.Data.User[i].PrivateKey)
+		teams.Data.User[i].PrivateKey, err = xr.PublicEncrypt(teams.Data.User[i].PrivateKey)
 		if err != nil {
 			log.Println("PublicEncrypt[new]", err)
 			return
 		}
 	}
-	req.OrganizationUser = append(req.OrganizationUser, orgs.Data.User...)
+	req.TeamUser = append(req.TeamUser, teams.Data.User...)
 
 	// sync
 	body, err = dao.API.Do("/user/passwd", "POST", req)

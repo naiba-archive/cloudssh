@@ -16,20 +16,20 @@ var DeleteCmd *cobra.Command
 func init() {
 	DeleteCmd = &cobra.Command{
 		Use:   "delete",
-		Short: "delete organization user(s)",
+		Short: "delete team user(s)",
 	}
 	DeleteCmd.Flags().UintSlice("id", []uint{}, "sever id list --id=\"1,3,4\"")
 	DeleteCmd.Run = delete
 }
 
 func delete(cmd *cobra.Command, args []string) {
-	orgID, _ := cmd.Parent().Parent().PersistentFlags().GetUint64("oid")
-	if orgID == 0 {
-		log.Println("must set organization ID")
+	teamID, _ := cmd.Parent().Parent().PersistentFlags().GetUint64("oid")
+	if teamID == 0 {
+		log.Println("must set team ID")
 		return
 	}
 	id, _ := cmd.Flags().GetUintSlice("id")
-	var req apiio.DeleteOrganizationRequest
+	var req apiio.DeleteTeamRequest
 	req.ID = id
 	if len(req.ID) == 0 {
 		log.Println("Please input server id list")
@@ -42,7 +42,7 @@ func delete(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	body, err := dao.API.Do(fmt.Sprintf("/organization/%d/user/batch-delete", orgID), "POST", req)
+	body, err := dao.API.Do(fmt.Sprintf("/team/%d/user/batch-delete", teamID), "POST", req)
 	if err != nil {
 		log.Println("API Request", err)
 		return

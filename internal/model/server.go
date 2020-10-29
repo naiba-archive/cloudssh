@@ -8,8 +8,8 @@ const (
 
 	// ServerOwnerTypeUser ..
 	ServerOwnerTypeUser = 0
-	// ServerOwnerTypeOrganization ..
-	ServerOwnerTypeOrganization = 1
+	// ServerOwnerTypeTeam ..
+	ServerOwnerTypeTeam = 1
 )
 
 // Server ..

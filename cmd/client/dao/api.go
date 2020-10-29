@@ -63,14 +63,14 @@ func (api *APIClient) EditServer(id string) error {
 	}
 
 	var req apiio.ServerRequest
-	var orgXrsa *xrsa.XRsa
-	if resp.Data.OwnerType == model.ServerOwnerTypeOrganization {
-		req.OrganizationID = resp.Data.OwnerID
-		orgXrsa, err = api.GetOrganizationXRsa(req.OrganizationID)
+	var teamXrsa *xrsa.XRsa
+	if resp.Data.OwnerType == model.ServerOwnerTypeTeam {
+		req.TeamID = resp.Data.OwnerID
+		teamXrsa, err = api.GetTeamXRsa(req.TeamID)
 		if err != nil {
 			return err
 		}
-		if err := xcrypto.DecryptStructWithXRsa(&resp.Data, orgXrsa); err != nil {
+		if err := xcrypto.DecryptStructWithXRsa(&resp.Data, teamXrsa); err != nil {
 			return err
 		}
 	} else {
@@ -134,8 +134,8 @@ func (api *APIClient) EditServer(id string) error {
 		req.Name = resp.Data.Name
 	}
 
-	if req.OrganizationID > 0 {
-		if err := xcrypto.EncryptStructWithXRsa(&req, orgXrsa); err != nil {
+	if req.TeamID > 0 {
+		if err := xcrypto.EncryptStructWithXRsa(&req, teamXrsa); err != nil {
 			return err
 		}
 	} else {
@@ -160,8 +160,8 @@ func (api *APIClient) EditServer(id string) error {
 }
 
 // DialServer ..
-func (api *APIClient) DialServer(orgID uint64, name, id string) {
-	servers, err := api.GetServers(orgID)
+func (api *APIClient) DialServer(teamID uint64, name, id string) {
+	servers, err := api.GetServers(teamID)
 	if err != nil {
 		log.Println("API.GetServers", err)
 		return
@@ -250,10 +250,10 @@ func (api *APIClient) DialServer(orgID uint64, name, id string) {
 }
 
 // BatchDeleteServer ..
-func (api *APIClient) BatchDeleteServer(id []uint, organizationID uint64) {
+func (api *APIClient) BatchDeleteServer(id []uint, teamID uint64) {
 	var req apiio.DeleteServerRequest
 	req.ID = id
-	req.OrganizationID = organizationID
+	req.TeamID = teamID
 	if len(req.ID) == 0 {
 		log.Println("Please input server id list")
 		return
@@ -283,10 +283,10 @@ func (api *APIClient) BatchDeleteServer(id []uint, organizationID uint64) {
 }
 
 // GetServers ..
-func (api *APIClient) GetServers(organizationID uint64) ([]model.Server, error) {
+func (api *APIClient) GetServers(teamID uint64) ([]model.Server, error) {
 	var apiEndpoint string
-	if organizationID > 0 {
-		apiEndpoint = fmt.Sprintf("/organization/%d/server", organizationID)
+	if teamID > 0 {
+		apiEndpoint = fmt.Sprintf("/team/%d/server", teamID)
 	} else {
 		apiEndpoint = "/server"
 	}
@@ -301,16 +301,16 @@ func (api *APIClient) GetServers(organizationID uint64) ([]model.Server, error) 
 	if !resp.Success {
 		return nil, errors.New(resp.Message)
 	}
-	var orgXrsa *xrsa.XRsa
-	if organizationID > 0 {
-		orgXrsa, err = api.GetOrganizationXRsa(organizationID)
+	var teamXrsa *xrsa.XRsa
+	if teamID > 0 {
+		teamXrsa, err = api.GetTeamXRsa(teamID)
 		if err != nil {
 			return nil, err
 		}
 	}
 	for i := 0; i < len(resp.Data); i++ {
-		if organizationID > 0 {
-			err := xcrypto.DecryptStructWithXRsa(&resp.Data[i], orgXrsa)
+		if teamID > 0 {
+			err := xcrypto.DecryptStructWithXRsa(&resp.Data[i], teamXrsa)
 			if err != nil {
 				return nil, err
 			}
@@ -325,7 +325,7 @@ func (api *APIClient) GetServers(organizationID uint64) ([]model.Server, error) 
 }
 
 // CreateServer ..
-func (api *APIClient) CreateServer(organizationID uint64) {
+func (api *APIClient) CreateServer(teamID uint64) {
 	var req apiio.ServerRequest
 	fmt.Print("Server IP: ")
 	fmt.Scanf("%s", &req.IP)
@@ -368,17 +368,17 @@ func (api *APIClient) CreateServer(organizationID uint64) {
 	fmt.Print("Server name: ")
 	fmt.Scanf("%s", &req.Name)
 
-	if organizationID > 0 {
-		xr, err := api.GetOrganizationXRsa(organizationID)
+	if teamID > 0 {
+		xr, err := api.GetTeamXRsa(teamID)
 		if err != nil {
-			log.Println("GetOrganizationXRsa", err)
+			log.Println("GetTeamXRsa", err)
 			return
 		}
 		if err := xcrypto.EncryptStructWithXRsa(&req, xr); err != nil {
 			log.Println("EncryptStructWithXRsa", err)
 			return
 		}
-		req.OrganizationID = organizationID
+		req.TeamID = teamID
 	} else {
 		if err := xcrypto.EncryptStruct(&req, Conf.MasterKey); err != nil {
 			log.Println("EncryptStruct", err)
@@ -403,13 +403,13 @@ func (api *APIClient) CreateServer(organizationID uint64) {
 	log.Println(resp.Message)
 }
 
-// GetOrganizationByID ..
-func (api *APIClient) GetOrganizationByID(organizationID uint64) (*apiio.MyOrganizationInfo, error) {
-	body, err := api.Do(fmt.Sprintf("/organization/%d", organizationID), "GET", nil)
+// GetTeamByID ..
+func (api *APIClient) GetTeamByID(teamID uint64) (*apiio.MyTeamInfo, error) {
+	body, err := api.Do(fmt.Sprintf("/team/%d", teamID), "GET", nil)
 	if err != nil {
 		return nil, err
 	}
-	var resp apiio.GetOrganizationResponse
+	var resp apiio.GetTeamResponse
 	if err = json.Unmarshal(body, &resp); err != nil {
 		return nil, err
 	}
@@ -420,7 +420,7 @@ func (api *APIClient) GetOrganizationByID(organizationID uint64) (*apiio.MyOrgan
 }
 
 // Do ..
-func (api *APIClient) Do(url, method string, data interface{}) ([]byte, error) {
+func (api *APIClient) Do(apiPath, method string, data interface{}) ([]byte, error) {
 	var req *http.Request
 	var err error
 	if data != nil {
@@ -428,13 +428,13 @@ func (api *APIClient) Do(url, method string, data interface{}) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		req, err = http.NewRequest(method, Conf.Server+url, bytes.NewReader(x))
+		req, err = http.NewRequest(method, Conf.Server+apiPath, bytes.NewReader(x))
 		if err != nil {
 			return nil, err
 		}
 		req.Header.Set("content-type", "application/json")
 	} else {
-		req, err = http.NewRequest(method, Conf.Server+url, nil)
+		req, err = http.NewRequest(method, Conf.Server+apiPath, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -442,6 +442,7 @@ func (api *APIClient) Do(url, method string, data interface{}) ([]byte, error) {
 	if Conf.User.TokenExpires.After(time.Now()) {
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", Conf.User.Token))
 	}
+
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -450,9 +451,9 @@ func (api *APIClient) Do(url, method string, data interface{}) ([]byte, error) {
 	return ioutil.ReadAll(resp.Body)
 }
 
-// GetOrganizationXRsa ..
-func (api *APIClient) GetOrganizationXRsa(id uint64) (*xrsa.XRsa, error) {
-	info, err := api.GetOrganizationByID(id)
+// GetTeamXRsa ..
+func (api *APIClient) GetTeamXRsa(id uint64) (*xrsa.XRsa, error) {
+	info, err := api.GetTeamByID(id)
 	if err != nil {
 		return nil, err
 	}
@@ -460,9 +461,9 @@ func (api *APIClient) GetOrganizationXRsa(id uint64) (*xrsa.XRsa, error) {
 	if err != nil {
 		return nil, err
 	}
-	orgPkStr, err := xr.PrivateDecrypt(info.OrganizationUser.PrivateKey)
+	teamPkStr, err := xr.PrivateDecrypt(info.TeamUser.PrivateKey)
 	if err != nil {
 		return nil, err
 	}
-	return xrsa.NewXRsa([]byte(info.Organization.Pubkey), []byte(orgPkStr))
+	return xrsa.NewXRsa([]byte(info.Team.Pubkey), []byte(teamPkStr))
 }

@@ -25,25 +25,25 @@ func GetUserInfo(c *fiber.Ctx) {
 	})
 }
 
-// ListAllOrganizationUser ..
-func ListAllOrganizationUser(c *fiber.Ctx) {
+// ListAllTeamUser ..
+func ListAllTeamUser(c *fiber.Ctx) {
 	user := c.Locals("user").(model.User)
-	var userOrg []model.OrganizationUser
-	if err := dao.DB.Where("user_id = ?", user.ID).Find(&userOrg).Error; err != nil {
+	var userTeam []model.TeamUser
+	if err := dao.DB.Where("user_id = ?", user.ID).Find(&userTeam).Error; err != nil {
 		c.Next(err)
 		return
 	}
-	c.JSON(apiio.ListOrganizationUserResponse{
+	c.JSON(apiio.ListTeamUserResponse{
 		Response: apiio.Response{
 			Success: true,
 			Message: "",
 		},
 		Data: struct {
-			User  []model.OrganizationUser
+			User  []model.TeamUser
 			Key   map[uint64]string
 			Email map[uint64]string
 		}{
-			User: userOrg,
+			User: userTeam,
 		},
 	})
 }
@@ -80,9 +80,9 @@ func Passwd(c *fiber.Ctx) {
 	tx := dao.DB.Begin()
 
 	var count int
-	tx.Model(&model.OrganizationUser{}).Where("user_id = ?", user.ID).Count(&count)
-	if count != len(req.OrganizationUser) {
-		c.Next(errors.New("Sync OrganizationUser data count not match"))
+	tx.Model(&model.TeamUser{}).Where("user_id = ?", user.ID).Count(&count)
+	if count != len(req.TeamUser) {
+		c.Next(errors.New("Sync TeamUser data count not match"))
 		return
 	}
 	tx.Model(&model.Server{}).Where("owner_id = ? AND owner_type = ?", user.ID, model.ServerOwnerTypeUser).Count(&count)
@@ -95,8 +95,8 @@ func Passwd(c *fiber.Ctx) {
 		c.Next(err)
 		return
 	}
-	for i := 0; i < len(req.OrganizationUser); i++ {
-		if err := tx.Model(&model.OrganizationUser{}).Where("organization_id = ? AND user_id = ?", req.OrganizationUser[i].OrganizationID, user.ID).Update("private_key", req.OrganizationUser[i].PrivateKey).Error; err != nil {
+	for i := 0; i < len(req.TeamUser); i++ {
+		if err := tx.Model(&model.TeamUser{}).Where("team_id = ? AND user_id = ?", req.TeamUser[i].TeamID, user.ID).Update("private_key", req.TeamUser[i].PrivateKey).Error; err != nil {
 			tx.Rollback()
 			c.Next(err)
 			return

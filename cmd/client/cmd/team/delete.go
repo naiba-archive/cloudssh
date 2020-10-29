@@ -1,4 +1,4 @@
-package organization
+package team
 
 import (
 	"encoding/json"
@@ -16,7 +16,7 @@ var DeleteCmd *cobra.Command
 func init() {
 	DeleteCmd = &cobra.Command{
 		Use:   "delete",
-		Short: "delete organization(s)",
+		Short: "delete team(s)",
 	}
 	DeleteCmd.Flags().UintSlice("id", []uint{}, "sever id list --id=\"1,3,4\"")
 	DeleteCmd.Run = delete
@@ -24,7 +24,7 @@ func init() {
 
 func delete(cmd *cobra.Command, args []string) {
 	id, _ := cmd.Flags().GetUintSlice("id")
-	var req apiio.DeleteOrganizationRequest
+	var req apiio.DeleteTeamRequest
 	req.ID = id
 	if len(req.ID) == 0 {
 		log.Println("Please input server id list")
@@ -37,7 +37,7 @@ func delete(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	body, err := dao.API.Do("/organization/batch-delete", "POST", req)
+	body, err := dao.API.Do("/team/batch-delete", "POST", req)
 	if err != nil {
 		log.Println("API Request", err)
 		return
